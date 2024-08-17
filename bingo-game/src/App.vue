@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue"
+
 const numbers = ref([
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
   23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
@@ -20,6 +21,8 @@ numberOnBoard.shift()
 
 const shuffledNumbers = ref([])
 
+const selectedNumbers = ref([])
+
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
     randomIndex
@@ -27,6 +30,7 @@ const shuffleNumber = () => {
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
+
 
      [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
@@ -36,11 +40,25 @@ const shuffleNumber = () => {
   shuffledNumbers.value = [...numberOnBoard]
 }
 
+
+const toggleSelection = (number) => {
+  if (number === usedNumber.value[usedNumber.value.length - 1]) {
+    if (selectedNumbers.value.includes(number)) {
+      selectedNumbers.value = selectedNumbers.value.filter((num) => num !== number)
+    } else {
+      selectedNumbers.value.push(number)
+    }
+  }
+}
+
+const isSelected = (number) => selectedNumbers.value.includes(number)
+
 onMounted(() => {
   shuffleNumber()
 })
 
 console.log(shuffleNumber())
+
 </script>
 
 <template>
@@ -49,8 +67,10 @@ console.log(shuffleNumber())
       <!-- Header -->
       <div class="flex flex-row justify-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
+
         <!-- <img src="../src/assets/img/logo.png"> -->
         <!-- <h1 class="text-3xl text-white font-bold m-10">Bingo Game</h1> -->
+
       </div>
 
       <div class="flex flex-col items-center">
@@ -110,6 +130,9 @@ console.log(shuffleNumber())
         </div>
       </div>
 
+
+      <!-- Bingo Board -->
+
       <div class="overflow-x-auto flex justify-center">
         <div>
           <table class="table-lg bg-white m-9 rounded-lg table-zebra">
@@ -130,7 +153,18 @@ console.log(shuffleNumber())
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
-                  class="h-20 w-20 text-center"
+
+                  @click="toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])"
+                  :class="[
+                    'h-20 w-20 text-center cursor-pointer',
+                    isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                      ? 'bg-pink-500 text-white'
+                      : '',
+                    shuffledNumbers[(i - 1) * 5 + (j - 1)] === usedNumber[usedNumber.length - 1]
+                      ? 'hover:bg-gray-200'
+                      : 'pointer-events-none opacity-50'
+                  ]"
+
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
                 </td>
