@@ -21,7 +21,6 @@ numberOnBoard.shift()
 
 const shuffledNumbers = ref([])
 
-// Store the state of selected numbers on the bingo board
 const selectedNumbers = ref([])
 
 const shuffleNumber = () => {
@@ -32,13 +31,15 @@ const shuffleNumber = () => {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
 
-    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+
+     [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
       numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
 }
+
 
 const toggleSelection = (number) => {
   if (number === usedNumber.value[usedNumber.value.length - 1]) {
@@ -55,6 +56,9 @@ const isSelected = (number) => selectedNumbers.value.includes(number)
 onMounted(() => {
   shuffleNumber()
 })
+
+console.log(shuffleNumber())
+
 </script>
 
 <template>
@@ -63,6 +67,10 @@ onMounted(() => {
       <!-- Header -->
       <div class="flex flex-row justify-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
+
+        <!-- <img src="../src/assets/img/logo.png"> -->
+        <!-- <h1 class="text-3xl text-white font-bold m-10">Bingo Game</h1> -->
+
       </div>
 
       <div class="flex flex-col items-center">
@@ -122,7 +130,9 @@ onMounted(() => {
         </div>
       </div>
 
+
       <!-- Bingo Board -->
+
       <div class="overflow-x-auto flex justify-center">
         <div>
           <table class="table-lg bg-white m-9 rounded-lg table-zebra">
@@ -143,6 +153,7 @@ onMounted(() => {
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
+
                   @click="toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])"
                   :class="[
                     'h-20 w-20 text-center cursor-pointer',
@@ -153,6 +164,7 @@ onMounted(() => {
                       ? 'hover:bg-gray-200'
                       : 'pointer-events-none opacity-50'
                   ]"
+
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
                 </td>
