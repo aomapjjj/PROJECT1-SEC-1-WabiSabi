@@ -16,27 +16,6 @@ numberOnBoard.shift()
 
 const shuffledNumbers = ref([])
 
-const shuffleNumber = () => {
-  let currentIndex = numberOnBoard.length,
-    randomIndex
-
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex)
-    currentIndex--
-
-     [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
-      numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
-    ]
-  }
-  shuffledNumbers.value = [...numberOnBoard]
-}
-
-let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
-numberOnBoard.shift()
-
-const shuffledNumbers = ref([])
-
 // Store the state of selected numbers on the bingo board
 const selectedNumbers = ref([])
 
