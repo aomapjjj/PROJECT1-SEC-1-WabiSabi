@@ -1,19 +1,35 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted , computed } from "vue"
+const numbers = ref(Array.from(Array(51).keys()).splice(1))
 
-const numbers = ref([
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-  23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-  42, 43, 44, 45, 46, 47, 48, 49, 50
-])
 const usedNumber = ref([])
-const randomBtnText = ref('Random Number')
-
+const randomBtnText = ref("Random Number")
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
-  if (numbers.value.length === 0) randomBtnText.value = 'Out Of Number!'
+  if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
+}
+
+let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
+numberOnBoard.shift()
+
+const shuffledNumbers = ref([])
+
+const shuffleNumber = () => {
+  let currentIndex = numberOnBoard.length,
+    randomIndex
+
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+
+     [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+      numberOnBoard[randomIndex],
+      numberOnBoard[currentIndex]
+    ]
+  }
+  shuffledNumbers.value = [...numberOnBoard]
 }
 
 let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
@@ -61,6 +77,9 @@ const visibleNumbers = computed(() => {
 onMounted(() => {
   shuffleNumber()
 })
+
+console.log(shuffleNumber())
+
 </script>
 
 <template>
@@ -74,7 +93,7 @@ onMounted(() => {
       <div class="flex flex-col items-center">
         <div class="bg-white p-4 rounded-full shadow-lg w-6/12 text-center">
           <p class="text-3xl font-bold text-indigo-500">
-            {{ usedNumber[usedNumber.length - 1] || 'No numbers selected yet' }}
+            {{ usedNumber[usedNumber.length - 1] || "No numbers selected yet" }}
           </p>
         </div>
       </div>
