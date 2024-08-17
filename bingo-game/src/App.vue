@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted , computed } from "vue"
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
+
 const usedNumber = ref([])
 const randomBtnText = ref("Random Number")
 const randomNumber = () => {
@@ -31,11 +32,54 @@ const shuffleNumber = () => {
   shuffledNumbers.value = [...numberOnBoard]
 }
 
+let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
+numberOnBoard.shift()
+
+const shuffledNumbers = ref([])
+
+// Store the state of selected numbers on the bingo board
+const selectedNumbers = ref([])
+
+const shuffleNumber = () => {
+  let currentIndex = numberOnBoard.length,
+    randomIndex
+
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+      numberOnBoard[randomIndex],
+      numberOnBoard[currentIndex]
+    ]
+  }
+  shuffledNumbers.value = [...numberOnBoard]
+}
+
+const toggleSelection = (number) => {
+  if (number === usedNumber.value[usedNumber.value.length - 1]) {
+    if (selectedNumbers.value.includes(number)) {
+      selectedNumbers.value = selectedNumbers.value.filter(
+        (num) => num !== number
+      )
+    } else {
+      selectedNumbers.value.push(number)
+    }
+  }
+}
+
+const isSelected = (number) => selectedNumbers.value.includes(number)
+
+// visible numbers
+const visibleNumbers = computed(() => {
+  return usedNumber.value.slice(-5)
+})
+
 onMounted(() => {
   shuffleNumber()
 })
 
 console.log(shuffleNumber())
+
 </script>
 
 <template>
@@ -44,8 +88,6 @@ console.log(shuffleNumber())
       <!-- Header -->
       <div class="flex flex-row justify-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
-        <!-- <img src="../src/assets/img/logo.png"> -->
-        <!-- <h1 class="text-3xl text-white font-bold m-10">Bingo Game</h1> -->
       </div>
 
       <div class="flex flex-col items-center">
@@ -92,9 +134,10 @@ console.log(shuffleNumber())
 
       <!-- Random Numbers Display -->
       <div class="flex flex-col items-center mt-8">
+        <!-- Display the first 5 numbers -->
         <div class="flex flex-wrap gap-4 justify-center">
           <div
-            v-for="(num, index) in usedNumber.toReversed()"
+            v-for="(num, index) in visibleNumbers.reverse()"
             :key="index"
             class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-white"
           >
@@ -105,6 +148,7 @@ console.log(shuffleNumber())
         </div>
       </div>
 
+      <!-- Bingo Board -->
       <div class="overflow-x-auto flex justify-center">
         <div>
           <table class="table-lg bg-white m-9 rounded-lg table-zebra">
@@ -125,7 +169,19 @@ console.log(shuffleNumber())
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
-                  class="h-20 w-20 text-center"
+                  @click="
+                    toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                  "
+                  :class="[
+                    'h-20 w-20 text-center cursor-pointer',
+                    isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                      ? 'bg-pink-500 text-white'
+                      : '',
+                    shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
+                    usedNumber[usedNumber.length - 1]
+                      ? 'hover:bg-gray-200'
+                      : 'pointer-events-none opacity-50'
+                  ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
                 </td>
