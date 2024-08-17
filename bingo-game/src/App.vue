@@ -4,22 +4,22 @@ import { ref, onMounted } from "vue"
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
 const randomBtnText = ref("Random Number")
-const toDisabledwhileRandom = ref(true)
-
+const toDisabledwhileRandom = ref(false)
+const shuffledNumbers = ref([])
+const selectedNumbers = ref([])
 
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
   if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
+  toDisabledwhileRandom.value = true;
 }
 
 let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
 
-const shuffledNumbers = ref([])
 
-const selectedNumbers = ref([])
 
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
@@ -36,7 +36,7 @@ const shuffleNumber = () => {
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
-
+  toDisabledwhileRandom.value = false;
 }
 
 console.log(numberOnBoard)
@@ -90,7 +90,7 @@ console.log(shuffleNumber())
         >
           {{ randomBtnText }}
         </button>
-        <button class="btn btn-warning" @click="shuffleNumber" v-show="toDisabledwhileRandom" >
+        <button class="btn btn-warning" @click="shuffleNumber" :disabled="toDisabledwhileRandom" >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
