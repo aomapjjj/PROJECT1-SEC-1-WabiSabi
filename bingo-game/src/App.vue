@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from 'vue'
 
 const numbers = ref([
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
@@ -7,13 +7,13 @@ const numbers = ref([
   42, 43, 44, 45, 46, 47, 48, 49, 50
 ])
 const usedNumber = ref([])
-const randomBtnText = ref("Random Number")
+const randomBtnText = ref('Random Number')
 
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
-  if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
+  if (numbers.value.length === 0) randomBtnText.value = 'Out Of Number!'
 }
 
 let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
@@ -31,7 +31,6 @@ const shuffleNumber = () => {
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
-
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
       numberOnBoard[currentIndex]
@@ -43,7 +42,9 @@ const shuffleNumber = () => {
 const toggleSelection = (number) => {
   if (number === usedNumber.value[usedNumber.value.length - 1]) {
     if (selectedNumbers.value.includes(number)) {
-      selectedNumbers.value = selectedNumbers.value.filter((num) => num !== number)
+      selectedNumbers.value = selectedNumbers.value.filter(
+        (num) => num !== number
+      )
     } else {
       selectedNumbers.value.push(number)
     }
@@ -51,6 +52,11 @@ const toggleSelection = (number) => {
 }
 
 const isSelected = (number) => selectedNumbers.value.includes(number)
+
+// visible numbers
+const visibleNumbers = computed(() => {
+  return usedNumber.value.slice(-5)
+})
 
 onMounted(() => {
   shuffleNumber()
@@ -68,7 +74,7 @@ onMounted(() => {
       <div class="flex flex-col items-center">
         <div class="bg-white p-4 rounded-full shadow-lg w-6/12 text-center">
           <p class="text-3xl font-bold text-indigo-500">
-            {{ usedNumber[usedNumber.length - 1] || "No numbers selected yet" }}
+            {{ usedNumber[usedNumber.length - 1] || 'No numbers selected yet' }}
           </p>
         </div>
       </div>
@@ -109,9 +115,10 @@ onMounted(() => {
 
       <!-- Random Numbers Display -->
       <div class="flex flex-col items-center mt-8">
+        <!-- Display the first 5 numbers -->
         <div class="flex flex-wrap gap-4 justify-center">
           <div
-            v-for="(num, index) in usedNumber.toReversed()"
+            v-for="(num, index) in visibleNumbers.reverse()"
             :key="index"
             class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-white"
           >
@@ -143,13 +150,16 @@ onMounted(() => {
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
-                  @click="toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])"
+                  @click="
+                    toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                  "
                   :class="[
                     'h-20 w-20 text-center cursor-pointer',
                     isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
                       ? 'bg-pink-500 text-white'
                       : '',
-                    shuffledNumbers[(i - 1) * 5 + (j - 1)] === usedNumber[usedNumber.length - 1]
+                    shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
+                    usedNumber[usedNumber.length - 1]
                       ? 'hover:bg-gray-200'
                       : 'pointer-events-none opacity-50'
                   ]"
