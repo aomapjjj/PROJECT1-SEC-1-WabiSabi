@@ -1,13 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue"
 
-const numbers = ref([
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-  23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-  42, 43, 44, 45, 46, 47, 48, 49, 50
-])
+const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
 const randomBtnText = ref("Random Number")
+const toDisabledwhileRandom = ref(true)
+
 
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
@@ -16,7 +14,7 @@ const randomNumber = () => {
   if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
 }
 
-let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
+let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 const shuffledNumbers = ref([])
@@ -38,8 +36,10 @@ const shuffleNumber = () => {
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
+
 }
 
+console.log(numberOnBoard)
 
 const toggleSelection = (number) => {
   if (number === usedNumber.value[usedNumber.value.length - 1]) {
@@ -84,12 +84,13 @@ console.log(shuffleNumber())
       <div class="flex flex-row justify-center m-8">
         <button
           class="btn mr-3"
-          :disabled="randomBtnText === 'Out Of Number!'"
-          @click="randomNumber"
+          :disabled="randomBtnText === 'Out Of Number!' "
+          @click="randomNumber "
+          
         >
           {{ randomBtnText }}
         </button>
-        <button class="btn btn-warning" @click="shuffleNumber">
+        <button class="btn btn-warning" @click="shuffleNumber" v-show="toDisabledwhileRandom" >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -161,8 +162,7 @@ console.log(shuffleNumber())
                       ? 'bg-pink-500 text-white'
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] === usedNumber[usedNumber.length - 1]
-                      ? 'hover:bg-gray-200'
-                      : 'pointer-events-none opacity-50'
+                     
                   ]"
 
                 >
