@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted , computed } from "vue"
+import { ref, onMounted, computed } from 'vue'
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 
 const usedNumber = ref([])
-const randomBtnText = ref("Random Number")
+const randomBtnText = ref('Random Number')
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
-  if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
+  if (numbers.value.length === 0) randomBtnText.value = 'Out Of Number!'
 }
 
 let numberOnBoard = Array.apply(null, { length: 26 }).map(Number.call, Number)
@@ -58,7 +58,6 @@ onMounted(() => {
 })
 
 console.log(shuffleNumber())
-
 </script>
 
 <template>
@@ -70,9 +69,9 @@ console.log(shuffleNumber())
       </div>
 
       <div class="flex flex-col items-center">
-        <div class="bg-white p-4 rounded-full shadow-lg w-6/12 text-center">
+        <div class="bg-white p-4 shadow-lg w-1/12 h-16 text-center">
           <p class="text-3xl font-bold text-indigo-500">
-            {{ usedNumber[usedNumber.length - 1] || "No numbers selected yet" }}
+            {{ usedNumber[usedNumber.length - 1] }}
           </p>
         </div>
       </div>
@@ -114,15 +113,18 @@ console.log(shuffleNumber())
       <!-- Random Numbers Display -->
       <div class="flex flex-col items-center mt-8">
         <!-- Display the first 5 numbers -->
-        <div class="flex flex-wrap gap-4 justify-center">
-          <div
-            v-for="(num, index) in visibleNumbers.reverse()"
-            :key="index"
-            class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-white"
-          >
-            <p class="text-2xl font-bold text-indigo-500">
-              {{ num }}
-            </p>
+    <div class="relative p-6 border-4 border-indigo-500 rounded-full bg-white shadow-xl w-4/12 h-24 flex items-center justify-center">
+
+          <div class="flex flex-wrap gap-4 justify-center">
+            <div
+              v-for="(num, index) in visibleNumbers.reverse()"
+              :key="index"
+              class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
+            >
+              <p class="text-2xl font-bold text-white">
+                {{ num }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -130,15 +132,15 @@ console.log(shuffleNumber())
       <!-- Bingo Board -->
       <div class="overflow-x-auto flex justify-center">
         <div>
-          <table class="table-lg bg-white m-9 rounded-lg table-zebra">
+          <table class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra">
             <!-- head -->
             <thead>
               <tr>
-                <th>B</th>
-                <th>I</th>
-                <th>N</th>
-                <th>G</th>
-                <th>O</th>
+                <th class="bg-red-500 text-white text-3xl">B</th>
+                <th class="bg-yellow-500 text-white text-3xl">I</th>
+                <th class="bg-green-500 text-white text-3xl">N</th>
+                <th class="bg-blue-500 text-white text-3xl">G</th>
+                <th class="bg-purple-500 text-white text-3xl">O</th>
               </tr>
             </thead>
 
@@ -173,4 +175,10 @@ console.log(shuffleNumber())
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.jersey-20-regular {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+</style>
