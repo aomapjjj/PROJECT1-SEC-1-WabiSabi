@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted } from "vue"
+
+import { ref, onMounted , computed} from "vue"
 import bgSoundUrl from "./assets/audio/bg-sound.mp3"
 
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
@@ -18,12 +19,21 @@ const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
+
   if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
   toDisabledwhileRandom.value = true
+
 }
 
 let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
+
+
+const shuffledNumbers = ref([])
+
+// Store the state of selected numbers on the bingo board
+const selectedNumbers = ref([])
+
 
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
@@ -42,6 +52,7 @@ const shuffleNumber = () => {
   toDisabledwhileRandom.value = false
 }
 
+
 console.log(numberOnBoard)
 
 const toggleSelection = (number) => {
@@ -58,6 +69,7 @@ const toggleSelection = (number) => {
 
 const isSelected = (number) => selectedNumbers.value.includes(number)
 
+
 let audio = new Audio(bgSoundUrl)
 
 
@@ -72,7 +84,13 @@ const stopMusic = () => {
   showAudio.value = !showAudio.value
 }
 
+const visibleNumbers = computed(() => {
+  return usedNumber.value.slice(-5)
+})
+
+
 console.log(shuffleNumber())
+
 </script>
 
 <template>
@@ -90,16 +108,15 @@ console.log(shuffleNumber())
 
       <!-- Header -->
       <div class="flex flex-row justify-center">
+
         <img class="h-40 w-40 ml-24" src="../src/assets/img/bingo.png" />
 
-        <!-- <img src="../src/assets/img/logo.png"> -->
-        <!-- <h1 class="text-3xl text-white font-bold m-10">Bingo Game</h1> -->
       </div>
 
       <div class="flex flex-col items-center">
-        <div class="bg-white p-4 rounded-full shadow-lg w-6/12 text-center">
+        <div class="bg-white p-4 shadow-lg w-1/12 h-16 text-center">
           <p class="text-3xl font-bold text-indigo-500">
-            {{ usedNumber[usedNumber.length - 1] || "No numbers selected yet" }}
+            {{ usedNumber[usedNumber.length - 1] }}
           </p>
         </div>
       </div>
@@ -144,15 +161,19 @@ console.log(shuffleNumber())
 
       <!-- Random Numbers Display -->
       <div class="flex flex-col items-center mt-8">
-        <div class="flex flex-wrap gap-4 justify-center">
-          <div
-            v-for="(num, index) in usedNumber.toReversed()"
-            :key="index"
-            class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-white"
-          >
-            <p class="text-2xl font-bold text-indigo-500">
-              {{ num }}
-            </p>
+        <!-- Display the first 5 numbers -->
+    <div class="relative p-6 border-4 border-indigo-500 rounded-full bg-white shadow-xl w-4/12 h-24 flex items-center justify-center">
+
+          <div class="flex flex-wrap gap-4 justify-center">
+            <div
+              v-for="(num, index) in visibleNumbers.reverse()"
+              :key="index"
+              class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
+            >
+              <p class="text-2xl font-bold text-white">
+                {{ num }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -161,15 +182,15 @@ console.log(shuffleNumber())
 
       <div class="overflow-x-auto flex justify-center">
         <div>
-          <table class="table-lg bg-white m-9 rounded-lg table-zebra">
+          <table class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra">
             <!-- head -->
             <thead>
               <tr>
-                <th>B</th>
-                <th>I</th>
-                <th>N</th>
-                <th>G</th>
-                <th>O</th>
+                <th class="bg-red-500 text-white text-3xl">B</th>
+                <th class="bg-yellow-500 text-white text-3xl">I</th>
+                <th class="bg-green-500 text-white text-3xl">N</th>
+                <th class="bg-blue-500 text-white text-3xl">G</th>
+                <th class="bg-purple-500 text-white text-3xl">O</th>
               </tr>
             </thead>
 
@@ -188,7 +209,9 @@ console.log(shuffleNumber())
                       ? 'bg-pink-500 text-white'
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
+
                       usedNumber[usedNumber.length - 1]
+
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -202,4 +225,10 @@ console.log(shuffleNumber())
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.jersey-20-regular {
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+</style>
