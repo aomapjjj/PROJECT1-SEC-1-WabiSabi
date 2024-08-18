@@ -87,7 +87,7 @@ console.log(shuffleNumber())
 </script>
 
 <template>
-  <div class="w-full h-full">
+ 
     <div class="w-full h-full">
       <!-- Video Background -->
       <video
@@ -156,43 +156,31 @@ console.log(shuffleNumber())
             :disabled="toDisabledwhileRandom"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              
-      <!-- Random Numbers Display -->
-      <div class="flex flex-col items-center mt-8">
-        <!-- Display the first 5 numbers -->
-        <div
-          class="relative p-6 border-4 border-indigo-500 rounded-full bg-white shadow-xl w-4/12 h-24 flex items-center justify-center"
-        >
-          <div class="flex flex-wrap gap-4 justify-center">
-            <div
-              v-for="(num, index) in visibleNumbers.toReversed()"
-              :key="index"
-              class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <g
+              fill="none"
+              stroke="#ffffff"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              color="#ffffff"
             >
-              <g
-                fill="none"
-                stroke="#ffffff"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                color="#ffffff"
-              >
-                <path
-                  d="M20.5 5.5h-11C5.787 5.5 3 8.185 3 12m.5 6.5h11c3.713 0 6.5-2.685 6.5-6.5"
-                />
-                <path
-                  d="M18.5 3S21 4.841 21 5.5S18.5 8 18.5 8m-13 8S3 17.841 3 18.5S5.5 21 5.5 21"
-                />
-              </g>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Random Numbers Display -->
+              <path
+                d="M20.5 5.5h-11C5.787 5.5 3 8.185 3 12m.5 6.5h11c3.713 0 6.5-2.685 6.5-6.5"
+              />
+              <path
+                d="M18.5 3S21 4.841 21 5.5S18.5 8 18.5 8m-13 8S3 17.841 3 18.5S5.5 21 5.5 21"
+              />
+            </g>
+          </svg>
+            </button>
+          </div>
+              
+     
         <div class="flex flex-col items-center mt-8">
           <!-- Display the first 5 numbers -->
           <div
@@ -211,7 +199,8 @@ console.log(shuffleNumber())
             </div>
           </div>
         </div>
-        
+
+
       <!-- Bingo Board -->
       <div class="overflow-x-auto flex justify-center">
         <div>
