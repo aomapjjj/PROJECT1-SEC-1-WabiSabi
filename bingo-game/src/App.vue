@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import bgSoundUrl from './assets/audio/bg-sound.mp3'
+import { ref, onMounted, computed } from "vue"
+import bgSound from "./assets/audio/bg-sound.mp3"
+import clickSound from "./assets/audio/click-sound.mp3"
 
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
@@ -56,18 +57,25 @@ const toggleSelection = (number) => {
   }
 }
 
-const isSelected = (number) => selectedNumbers.value.includes(number)
+const isSelected = (number) => {
+ return  selectedNumbers.value.includes(number)
+}
 
-let audio = new Audio(bgSoundUrl)
+let bgmusic = new Audio(bgSound)
+let toggleSound = new Audio(clickSound)
 
 const playMusic = () => {
-  audio.play()
+  bgmusic.play()
   showAudio.value = !showAudio.value
 }
 
 const stopMusic = () => {
-  audio.pause()
+  bgmusic.pause()
   showAudio.value = !showAudio.value
+}
+
+const clickMusic = () => {
+  toggleSound.play()
 }
 
 const visibleNumbers = computed(() => {
@@ -152,6 +160,18 @@ console.log(shuffleNumber())
               width="32"
               height="32"
               viewBox="0 0 24 24"
+              
+      <!-- Random Numbers Display -->
+      <div class="flex flex-col items-center mt-8">
+        <!-- Display the first 5 numbers -->
+        <div
+          class="relative p-6 border-4 border-indigo-500 rounded-full bg-white shadow-xl w-4/12 h-24 flex items-center justify-center"
+        >
+          <div class="flex flex-wrap gap-4 justify-center">
+            <div
+              v-for="(num, index) in visibleNumbers.toReversed()"
+              :key="index"
+              class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
             >
               <g
                 fill="none"
@@ -191,47 +211,46 @@ console.log(shuffleNumber())
             </div>
           </div>
         </div>
+        
+      <!-- Bingo Board -->
+      <div class="overflow-x-auto flex justify-center">
+        <div>
+          <table
+            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
+          >
+            <!-- head -->
+            <thead>
+              <tr>
+                <th class="bg-red-500 text-white text-3xl">B</th>
+                <th class="bg-yellow-500 text-white text-3xl">I</th>
+                <th class="bg-green-500 text-white text-3xl">N</th>
+                <th class="bg-blue-500 text-white text-3xl">G</th>
+                <th class="bg-purple-500 text-white text-3xl">O</th>
+              </tr>
+            </thead>
 
-        <!-- Bingo Board -->
-
-        <div class="overflow-x-auto flex justify-center">
-          <div>
-            <table class="jersey-20-regular table-lg bg-white m-9 table-zebra">
-              <!-- head -->
-              <thead>
-                <tr>
-                  <th class="bg-red-500 text-white text-3xl">B</th>
-                  <th class="bg-yellow-500 text-white text-3xl">I</th>
-                  <th class="bg-green-500 text-white text-3xl">N</th>
-                  <th class="bg-blue-500 text-white text-3xl">G</th>
-                  <th class="bg-purple-500 text-white text-3xl">O</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr v-for="i in 5" :key="i">
-                  <td
-                    v-for="j in 5"
-                    :key="j"
-                    :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
-                    @click="
-                      toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                    "
-                    :class="[
-                      'h-20 w-20 text-center cursor-pointer',
-                      isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                        ? 'bg-pink-500 text-white'
-                        : '',
-                      shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                        usedNumber[usedNumber.length - 1]
-                    ]"
-                  >
-                    {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <tbody>
+              <tr v-for="i in 5" :key="i">
+                <td
+                  v-for="j in 5"
+                  :key="j"
+                  :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
+                  @click="
+                    toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)]) 
+                  "
+                  :class="[
+                    'h-20 w-20 text-center cursor-pointer',
+                    isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                      ? `bg-pink-500 text-white ${clickMusic()}`: '',
+                    shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
+                      usedNumber[usedNumber.length - 1] 
+                  ]"
+                >
+                  {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -244,8 +263,8 @@ console.log(shuffleNumber())
   font-weight: 400;
   font-style: normal;
 }
+
 .bg-customRed {
   background-color: #F24452;
 }
-
 </style>
