@@ -29,12 +29,6 @@ let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 
-const shuffledNumbers = ref([])
-
-// Store the state of selected numbers on the bingo board
-const selectedNumbers = ref([])
-
-
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
     randomIndex
@@ -86,9 +80,10 @@ const stopMusic = () => {
 
 const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
+
 })
 
-
+console.log(visibleNumbers)
 console.log(shuffleNumber())
 
 </script>
@@ -166,7 +161,7 @@ console.log(shuffleNumber())
 
           <div class="flex flex-wrap gap-4 justify-center">
             <div
-              v-for="(num, index) in visibleNumbers.reverse()"
+              v-for="(num, index) in visibleNumbers.toReversed()"
               :key="index"
               class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
             >
