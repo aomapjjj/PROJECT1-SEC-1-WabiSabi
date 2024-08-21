@@ -115,6 +115,7 @@ console.log(shuffleNumber())
           <img class="h-40 w-40 ml-24" src="../src/assets/img/bingo.png" />
         </div>
 
+        <!----แสดงผลเลขล่าสุด---->
         <div class="flex flex-col items-center">
           <div class="bg-black p-4 shadow-md rounded-full w-1/12 h-16 text-center">
             <p class="text-3xl font-bold text-white">
@@ -165,7 +166,7 @@ console.log(shuffleNumber())
         <div class="flex flex-col items-center mt-8">
           <!-- Display the first 5 numbers -->
           <div
-            class="relative p-6 border-4 border-indigo-500 rounded-full bg-white shadow-xl w-4/12 h-24 flex items-center justify-center"
+            class="relative p-6 border-4 border-blue-500 rounded-md bg-white shadow-xl w-5/12 h-24 flex items-center justify-center"
           >
             <div class="flex flex-wrap gap-4 justify-center">
               <div
