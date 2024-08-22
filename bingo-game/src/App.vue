@@ -205,7 +205,7 @@ console.log(shuffleNumber())
                 <td
                   v-for="j in 5"
                   :key="j"
-                  :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
+                  :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]"
                   @click="
                     toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)]) 
                   "
