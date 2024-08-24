@@ -1,10 +1,48 @@
-# PROJECT1-SEC-1-WabiSabi
+<p align="center">Bingo Game</p>
 
-### MEMBERS
+## Member
 
-- 65130500050 นางสาว พาณิภัค จงศิริวาณิช
-- 65130500052 นางสาว พิมพ์พิชญา แก้วแสง
-- 65130500056 นางสาว แพรไหม วรรณศิริ
-- 65130500060 นาย ภานุวัฒน์ วงษ์กระจ่าง
+- **Student ID**: 65130500050
+  - **Name**: นางสาวพาณิภัค จงศิริวาณิช
+  - **Role**: 
+  - **Work Percentage**:
+- **Student ID**: 65130500052
+  - **Name**: นางสาวพิมพ์พิชญา แก้วแสง
+  - **Role**: 
+  - **Work Percentage**:
+- **Student ID**: 65130500056
+  - **Name**: นางสาวแพรไหม วรรณศิริ
+  - **Role**: 
+  - **Work Percentage**:
+- **Student ID**: 65130500060
+  - **Name**: นายภานุวัฒน์ วงษ์กระจ่าง
+  - **Role**: 
+  - **Work Percentage**:
+
+*Total Work Contribution: 100% (Group)*
+
+---
+
+## Application Features
+
+1. **Feature 1: [Feature Name]**
+   - Description: A concise explanation of this feature and its function in the app.
+
+2. **Feature 2: [Feature Name]**
+   - Description: A concise explanation of this feature and its function in the app.
+
+*...continue listing all major features...*
+
+---
+
+## User Guide
+
+---
+
+## Demo clip of the application's features (5-8min.)
+
+---
+
+## References or sources of inspiration for the development of the application. Specify clearly which parts of the application each reference is used for
 
 
