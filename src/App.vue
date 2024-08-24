@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import bgSound from "./assets/audio/bg-sound.mp3";
 import clickSound from "./assets/audio/click-sound.mp3";
 
-const numbers = ref(Array.from(Array(25).keys()).splice(1));
+const numbers = ref(Array.from(Array(51).keys()).splice(1));
 const usedNumber = ref([]);
 const randomBtnText = ref("Random Number");
 const toDisabledwhileRandom = ref(false);
