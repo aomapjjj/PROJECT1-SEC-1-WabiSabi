@@ -1,94 +1,101 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import bgSound from "./assets/audio/bg-sound.mp3";
-import clickSound from "./assets/audio/click-sound.mp3";
+import { ref, onMounted, computed } from "vue"
+import bgSound from "./assets/audio/bg-sound.mp3"
+import clickSound from "./assets/audio/click-sound.mp3"
 
-const numbers = ref(Array.from(Array(51).keys()).splice(1));
-const usedNumber = ref([]);
-const randomBtnText = ref("Random Number");
-const toDisabledwhileRandom = ref(false);
-const shuffledNumbers = ref([]);
-const selectedNumbers = ref([]);
-const showAudio = ref(true);
-const level = ref("default");
+const numbers = ref(Array.from(Array(26).keys()).splice(1))
+const usedNumber = ref([])
+const randomBtnText = ref("Random Number")
+const toDisabledwhileRandom = ref(false)
+const shuffledNumbers = ref([])
+const selectedNumbers = ref([])
+const showAudio = ref(true)
+const level = ref("default")
 
 const setLevel = (newLevel) => {
-  return (level.value = newLevel);
-};
+  return (level.value = newLevel)
+}
 
 onMounted(() => {
-  shuffleNumber();
-});
+  shuffleNumber()
+})
+
 
 const randomNumber = () => {
-  let randomIndex = Math.floor(Math.random() * numbers.value.length);
-  let number = numbers.value.splice(randomIndex, 1)[0];
-  usedNumber.value.push(number);
+  let randomIndex = Math.floor(Math.random() * numbers.value.length)
+  let number = numbers.value.splice(randomIndex, 1)[0]
+  usedNumber.value.push(number)
 
-  if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!";
-  toDisabledwhileRandom.value = true;
-};
+  if (numbers.value.length === 0) randomBtnText.value = "Out Of Number!"
+  toDisabledwhileRandom.value = true
+}
 
-let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number);
-numberOnBoard.shift();
+let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
+numberOnBoard.shift()
 
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
-    randomIndex;
+    randomIndex
 
   while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
-    ];
+      numberOnBoard[currentIndex]
+    ]
   }
-  shuffledNumbers.value = [...numberOnBoard];
-  toDisabledwhileRandom.value = false;
-};
+  shuffledNumbers.value = [...numberOnBoard]
+  toDisabledwhileRandom.value = false
+}
 
-console.log(numberOnBoard);
+console.log(numberOnBoard)
 
 const toggleSelection = (number) => {
-  if (number === usedNumber.value[usedNumber.value.length - 1]) {
+  if (usedNumber.value.includes(number)) {
+    // if (number === usedNumber.value[usedNumber.value.length - 1])
     if (selectedNumbers.value.includes(number)) {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
-      );
+      )
     } else {
-      selectedNumbers.value.push(number);
+      selectedNumbers.value.push(number)
+      clickMusic()
     }
+
   }
-};
+
+}
 
 const isSelected = (number) => {
-  return selectedNumbers.value.includes(number);
-};
+  return selectedNumbers.value.includes(number)
+}
 
-let bgmusic = new Audio(bgSound);
-let toggleSound = new Audio(clickSound);
+console.log('selectedNumbers.value', selectedNumbers.value)
+
+const bgmusic = new Audio(bgSound)
+const toggleSound = new Audio(clickSound)
 
 const playMusic = () => {
-  bgmusic.play();
-  showAudio.value = !showAudio.value;
-};
+  bgmusic.play()
+  showAudio.value = !showAudio.value
+}
 
 const stopMusic = () => {
-  bgmusic.pause();
-  showAudio.value = !showAudio.value;
-};
+  bgmusic.pause()
+  showAudio.value = !showAudio.value
+}
 
 const clickMusic = () => {
-  toggleSound.play();
-};
+  toggleSound.play()
+}
 
 const visibleNumbers = computed(() => {
-  return usedNumber.value.slice(-5);
-});
+  return usedNumber.value.slice(-5)
+})
 
-console.log(visibleNumbers);
-console.log(shuffleNumber());
+console.log(visibleNumbers)
+console.log(shuffleNumber())
 </script>
 
 <template>
@@ -104,7 +111,10 @@ console.log(shuffleNumber());
     </video>
 
     <!-- Level Selection -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center" v-if="level === 'default'">
+    <div
+      class="absolute inset-0 flex flex-col items-center justify-center"
+      v-if="level === 'default'"
+    >
       <div class="flex items-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
       </div>
@@ -112,7 +122,10 @@ console.log(shuffleNumber());
         <h1>BINGO MODE</h1>
       </div>
       <div class="mt-4">
-        <button @click="setLevel('easy')" class="mr-5 btn rounded hover:bg-blue-600">
+        <button
+          @click="setLevel('easy')"
+          class="mr-5 btn rounded hover:bg-blue-600"
+        >
           Line
         </button>
         <button @click="setLevel('hard')" class="btn rounded hover:bg-blue-600">
@@ -254,10 +267,10 @@ console.log(shuffleNumber());
                     :class="[
                       'h-20 w-20 text-center cursor-pointer',
                       isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                        ? `bg-pink-500 text-white ${clickMusic()}`
+                        ? `bg-pink-500 text-white `
                         : '',
                       shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                        usedNumber[usedNumber.length - 1],
+                        usedNumber[usedNumber.length - 1]
                     ]"
                   >
                     {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
