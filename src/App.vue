@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import bgSound from "./assets/audio/bg-sound.mp3";
 import clickSound from "./assets/audio/click-sound.mp3";
 
-const numbers = ref(Array.from(Array(25).keys()).splice(1));
+const numbers = ref(Array.from(Array(26).keys()).splice(1));
 const usedNumber = ref([]);
 const randomBtnText = ref("Random Number");
 const toDisabledwhileRandom = ref(false);
@@ -100,6 +100,7 @@ const hiddenNumbers = computed(() => {
 
 console.log(visibleNumbers)
 console.log(shuffleNumber())
+console.log('dfg',numbers)
 </script>
 
 <template>
@@ -186,7 +187,7 @@ console.log(shuffleNumber())
           </p>
         </div>
       </div>
-
+      <h1 class=" text-2xl font-bold flex justify-center mt-3" >{{25 - usedNumber.length }}</h1>
       <div class="flex flex-row justify-center m-8">
         <button
           class="btn mr-3"
@@ -276,6 +277,7 @@ console.log(shuffleNumber())
 
       <!-- Bingo Board -->
       <div class="overflow-x-auto flex justify-center">
+       
         <div>
           <table
             class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
