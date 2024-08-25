@@ -11,11 +11,15 @@ const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
 const level = ref('default')
+const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
 
 const setLevel = (newLevel) => {
+  gameStart.value = true
   return (level.value = newLevel)
 }
+
+
 
 onMounted(() => {
   shuffleNumber()
@@ -99,7 +103,7 @@ const hiddenNumbers = computed(() => {
 console.log(visibleNumbers)
 console.log(shuffleNumber())
 
-const checkBalckoutWin = ()  => {
+const checkBlackoutWin = ()  => {
   if (selectedNumbers.value.length !== 25) {
     return false;
   }
@@ -117,7 +121,17 @@ const checkBalckoutWin = ()  => {
   return false;
 }
 
-const hasWon = computed(() => checkBalckoutWin())
+const hasWon = computed(() => {
+  switch (level.value) {
+    case 'line':
+      return checkLineWin();
+    case 'blackout':
+      return checkBlackoutWin();
+    default:
+      return false;
+  }
+});
+
 </script>
 
 <template>
@@ -146,19 +160,19 @@ const hasWon = computed(() => checkBalckoutWin())
       </div>
       <div class="mt-4">
         <button
-          @click="setLevel('easy')"
+          @click="setLevel('line')"
           class="mr-5 btn rounded hover:bg-blue-600"
         >
           Line
         </button>
-        <button @click="setLevel('hard')" class="btn rounded hover:bg-blue-600">
+        <button @click="setLevel('blackout')" class="btn rounded hover:bg-blue-600">
           Black Out
         </button>
       </div>
     </div>
 
     <!-- game content -->
-    <div v-if="level==='easy'" class="relative z-10 flex flex-row w-full h-full">
+    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
