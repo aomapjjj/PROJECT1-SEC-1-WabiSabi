@@ -1,16 +1,16 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import bgSound from "./assets/audio/bg-sound.mp3";
-import clickSound from "./assets/audio/click-sound.mp3";
+import { ref, onMounted, computed } from "vue"
+import bgSound from "./assets/audio/bg-sound.mp3"
+import clickSound from "./assets/audio/click-sound.mp3"
 
-const numbers = ref(Array.from(Array(25).keys()).splice(1));
-const usedNumber = ref([]);
-const randomBtnText = ref("Random Number");
-const toDisabledwhileRandom = ref(false);
-const shuffledNumbers = ref([]);
-const selectedNumbers = ref([]);
-const showAudio = ref(true);
-const level = ref("default");
+const numbers = ref(Array.from(Array(51).keys()).splice(1))
+const usedNumber = ref([])
+const randomBtnText = ref("Random Number")
+const toDisabledwhileRandom = ref(false)
+const shuffledNumbers = ref([])
+const selectedNumbers = ref([])
+const showAudio = ref(true)
+const level = ref("default")
 const showHiddenNumbers = ref(false)
 
 const setLevel = (newLevel) => {
@@ -62,16 +62,14 @@ const toggleSelection = (number) => {
       selectedNumbers.value.push(number)
       clickMusic()
     }
-
   }
-
 }
 
 const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-console.log('selectedNumbers.value', selectedNumbers.value)
+console.log("selectedNumbers.value", selectedNumbers.value)
 
 const bgmusic = new Audio(bgSound)
 const toggleSound = new Audio(clickSound)
@@ -100,6 +98,28 @@ const hiddenNumbers = computed(() => {
 
 console.log(visibleNumbers)
 console.log(shuffleNumber())
+console.log("dfg", numbers)
+
+const checkBalckoutWin = ()  => {
+  if (selectedNumbers.value.length !== 25) {
+    return false;
+  }
+  for (let col = 0; col < 5; col++) {
+    let allMarked = true;
+    for (let i = col; i < 25; i += 5) {
+      if (!selectedNumbers.value[i]) {
+        allMarked = false;
+      }
+    }
+    if (allMarked) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const hasWon = computed(() => checkBalckoutWin());
+
 </script>
 
 <template>
@@ -139,10 +159,8 @@ console.log(shuffleNumber())
     </div>
   </div>
 
-    <!-- Game content -->
-    <div class="w-full h-full" v-if="level === 'easy'">
-
-
+  <!-- Game content -->
+  <div class="w-full h-full" v-if="level === 'easy'">
     <div class="relative z-10">
       <div class="flex float-end mt-6 m-3">
         <button @click="playMusic" v-show="showAudio">
@@ -172,21 +190,23 @@ console.log(shuffleNumber())
           </svg>
         </button>
       </div>
-      
+
       <!-- Header -->
       <div class="flex flex-row justify-center">
-        <img class=" h-48 w-48 ml-20" src="../src/assets/img/bingo.png" />
+        <img class="h-48 w-48 ml-20" src="../src/assets/img/bingo.png" />
       </div>
       <div class="flex flex-col items-center">
         <div
-          class=" p-3 shadow-md rounded-full w-16 h-16 text-center border border-neutral-950 border-r-4"
+          class="p-3 shadow-md rounded-full w-16 h-16 text-center border border-neutral-950 border-r-4"
         >
           <p class="text-3xl font-bold text-black">
             {{ usedNumber[usedNumber.length - 1] }}
           </p>
         </div>
       </div>
-
+      <h1 class="text-2xl font-bold flex justify-center mt-3">
+        {{ 25 - usedNumber.length }} Balls
+      </h1>
       <div class="flex flex-row justify-center m-8">
         <button
           class="btn mr-3"
@@ -290,35 +310,41 @@ console.log(shuffleNumber())
                 <th class="bg-purple-500 text-white text-3xl">O</th>
               </tr>
             </thead>
-              <tbody>
-                <tr v-for="i in 5" :key="i">
-                  <td
-                    v-for="j in 5"
-                    :key="j"
-                    :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
-                    @click="
-                      toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                    "
-                    :class="[
-                      'h-20 w-20 text-center cursor-pointer',
-                      isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                        ? `bg-pink-500 text-white `
-                        : '',
-                      shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                        usedNumber[usedNumber.length - 1]
-                    ]"
-                  >
-                    {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <tbody>
+              <tr v-for="i in 5" :key="i">
+                <td
+                  v-for="j in 5"
+                  :key="j"
+                  :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
+                  @click="
+                    toggleSelection(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                  "
+                  :class="[
+                    'h-20 w-20 text-center cursor-pointer',
+                    isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
+                      ? `bg-pink-500 text-white `
+                      : '',
+                    shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
+                      usedNumber[usedNumber.length - 1]
+                  ]"
+                >
+                  {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div
+            v-show="hasWon"
+            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+            role="alert"
+          >
+            <span class="font-medium">Success alert!</span> Change a few things
+            up and try submitting again.
           </div>
-
         </div>
       </div>
     </div>
-
+  </div>
 </template>
 
 <style scoped>
