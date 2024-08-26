@@ -14,7 +14,20 @@ const level = ref('default')
 const showHiddenNumbers = ref(false)
 
 const setLevel = (newLevel) => {
-  return (level.value = newLevel)
+  level.value = newLevel
+  if (newLevel !== 'default') {
+    startAutoRandomNumber()
+  }
+}
+
+// auto-random-number
+const startAutoRandomNumber = () => {
+  setInterval(
+    () => {
+      randomNumber()
+    },
+    1000 // 5 seconds
+  )
 }
 
 onMounted(() => {
@@ -99,22 +112,22 @@ const hiddenNumbers = computed(() => {
 console.log(visibleNumbers)
 console.log(shuffleNumber())
 
-const checkBalckoutWin = ()  => {
+const checkBalckoutWin = () => {
   if (selectedNumbers.value.length !== 25) {
-    return false;
+    return false
   }
   for (let col = 0; col < 5; col++) {
-    let allMarked = true;
+    let allMarked = true
     for (let i = col; i < 25; i += 5) {
       if (!selectedNumbers.value[i]) {
-        allMarked = false;
+        allMarked = false
       }
     }
     if (allMarked) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
 const hasWon = computed(() => checkBalckoutWin())
@@ -158,7 +171,10 @@ const hasWon = computed(() => checkBalckoutWin())
     </div>
 
     <!-- game content -->
-    <div v-if="level==='easy'" class="relative z-10 flex flex-row w-full h-full">
+    <div
+      v-if="level === 'easy'"
+      class="relative z-10 flex flex-row w-full h-full"
+    >
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
@@ -333,13 +349,31 @@ const hasWon = computed(() => checkBalckoutWin())
             </tbody>
           </table>
 
+          <!-- Aleart -->
+
           <div
             v-show="hasWon"
-            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
-            role="alert"
+            class="relative m-12 card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
           >
-            <span class="font-medium">Success alert!</span> Change a few things
-            up and try submitting again.
+            <!-- Video Background -->
+            <video
+              class="absolute inset-0 w-full h-full object-cover"
+              autoplay
+              loop
+              muted
+            >
+              <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+
+            <!-- Content over Video -->
+            <div class="relative z-10 card-body text-white">
+              <h2 class="card-title">Congrats!</h2>
+              <p>Awesome! You’re the bingo winner!</p>
+              <div class="card-actions justify-end">
+                <button class="btn bg-pink-500 text-white">Play again</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
