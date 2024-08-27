@@ -1,38 +1,26 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import bgSound from './assets/audio/bg-sound.mp3'
-import clickSound from './assets/audio/click-sound.mp3'
+import { ref, onMounted, computed } from "vue"
+import bgSound from "./assets/audio/bg-sound.mp3"
+import clickSound from "./assets/audio/click-sound.mp3"
 
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
-const level = ref('default')
+const level = ref("default")
+const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
 
 let autoRandomInterval = null
 
-
 const setLevel = (newLevel) => {
+  gameStart.value = true
   level.value = newLevel
-  if (newLevel !== 'default') {
-    startAutoRandomNumber()
-  }
-}
-
-// auto-random-number
-const startAutoRandomNumber = () => {
-  setInterval(
-    () => {
-      randomNumber()
-    },
-    1000 // 5 seconds
-  )
 }
 
 onMounted(() => {
@@ -45,7 +33,7 @@ const randomNumber = () => {
   usedNumber.value.push(number)
 
   if (numbers.value.length === 0) {
-    randomBtnText.value = 'Out Of Number!'
+    randomBtnText.value = "Out Of Number!"
     clearInterval(autoRandomInterval)
   }
   toDisabledwhileRandom.value = true
@@ -63,7 +51,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -90,7 +78,7 @@ const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-console.log('selectedNumbers.value', selectedNumbers.value)
+console.log("selectedNumbers.value", selectedNumbers.value)
 
 const bgmusic = new Audio(bgSound)
 const toggleSound = new Audio(clickSound)
@@ -120,7 +108,11 @@ const hiddenNumbers = computed(() => {
 console.log(visibleNumbers)
 console.log(shuffleNumber())
 
-const checkBalckoutWin = () => {
+const checkLineWin = () => {
+  // code here
+}
+
+const checkBlackoutWin = () => {
   if (selectedNumbers.value.length !== 25) {
     return false
   }
@@ -138,12 +130,21 @@ const checkBalckoutWin = () => {
   return false
 }
 
-const hasWon = computed(() => checkBalckoutWin())
+const hasWon = computed(() => {
+  switch (level.value) {
+    case "line":
+      return checkLineWin()
+    case "blackout":
+      return checkBlackoutWin()
+    default:
+      return false
+  }
+})
 
 // auto-random-number
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  randomBtnText.value = "Randomizing..."
 
   autoRandomInterval = setInterval(() => {
     randomNumber()
@@ -169,19 +170,18 @@ const resetGame = () => {
   usedNumber.value = []
   selectedNumbers.value = []
   shuffleNumber()
-  randomBtnText.value = 'Random Number'
-  level.value = 'default'
+  randomBtnText.value = "Random Number"
+  level.value = "default"
   showHiddenNumbers.value = false
   hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
 }
-
 </script>
 
 <template>
   <div class="relative w-full h-full">
     <!-- Video Background -->
     <video
-      class="absolute top-0 left-0 w-full h-full object-cover"
+      class="absolute top-0 left-0 w-full object-cover h-screen"
       autoplay
       loop
       muted
@@ -192,7 +192,7 @@ const resetGame = () => {
     <!-- Level Selection -->
     <div
       class="absolute inset-0 flex flex-col items-center mt-28"
-      v-if="level === 'default'"
+      v-if="!gameStart"
     >
       <!-- Logo Level -->
       <div class="flex items-center">
@@ -203,22 +203,23 @@ const resetGame = () => {
       </div>
       <div class="mt-4">
         <button
-          @click="setLevel('easy')"
+          @click="setLevel('line')"
           class="mr-5 btn rounded hover:bg-blue-600"
         >
           Line
         </button>
-        <button @click="setLevel('hard')" class="btn rounded hover:bg-blue-600">
+        <button
+          @click="setLevel('blackout')"
+          class="btn rounded hover:bg-blue-600"
+        >
           Black Out
         </button>
       </div>
     </div>
 
     <!-- game content -->
-    <div
-      v-if="level === 'easy'"
-      class="relative z-10 flex flex-row w-full h-full"
-    >
+
+    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
@@ -397,7 +398,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -410,7 +411,7 @@ const resetGame = () => {
           <div
             v-show="hasWon"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
-           >
+          >
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -431,14 +432,16 @@ const resetGame = () => {
                 <h2 class="card-title">Awesome!</h2>
                 <p class="">You’re the bingo winner!</p>
                 <div class="card-actions justify-end">
-                  <button @click="resetGame" class="btn bg-yellow-400 text-white">
+                  <button
+                    @click="resetGame"
+                    class="btn bg-yellow-400 text-white"
+                  >
                     Play again
                   </button>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -557,7 +560,7 @@ const resetGame = () => {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
