@@ -17,8 +17,22 @@ const alertCountdown = ref(false)
 
 let autoRandomInterval = null
 
+
 const setLevel = (newLevel) => {
-  return (level.value = newLevel)
+  level.value = newLevel
+  if (newLevel !== 'default') {
+    startAutoRandomNumber()
+  }
+}
+
+// auto-random-number
+const startAutoRandomNumber = () => {
+  setInterval(
+    () => {
+      randomNumber()
+    },
+    1000 // 5 seconds
+  )
 }
 
 onMounted(() => {
@@ -148,6 +162,19 @@ const startCountdown = () => {
     }
   }, 1000)
 }
+
+const resetGame = () => {
+  clearInterval(intervalId)
+  numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
+  usedNumber.value = []
+  selectedNumbers.value = []
+  shuffleNumber()
+  randomBtnText.value = 'Random Number'
+  level.value = 'default'
+  showHiddenNumbers.value = false
+  hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
+}
+
 </script>
 
 <template>
@@ -379,14 +406,39 @@ const startCountdown = () => {
             </tbody>
           </table>
 
+          <!-- Alert BG-->
           <div
             v-show="hasWon"
-            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
-            role="alert"
-          >
-            <span class="font-medium">Success alert!</span> Change a few things
-            up and try submitting again.
+            class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
+           >
+            <!-- Alert -->
+            <div
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+            >
+              <!-- Video Background -->
+              <video
+                class="absolute inset-0 w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+              >
+                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <!-- Content over Video -->
+              <div class="relative z-10 card-body text-white">
+                <h2 class="card-title">Awesome!</h2>
+                <p class="">You’re the bingo winner!</p>
+                <div class="card-actions justify-end">
+                  <button @click="resetGame" class="btn bg-yellow-400 text-white">
+                    Play again
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -394,6 +446,116 @@ const startCountdown = () => {
 </template>
 
 <style scoped>
+.bounce-in-top {
+  -webkit-animation: bounce-in-top 1.1s both;
+  animation: bounce-in-top 1.1s both;
+}
+
+@-webkit-keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
+@keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
+
 .jersey-20-regular {
   font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
