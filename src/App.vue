@@ -1,24 +1,30 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import bgSound from './assets/audio/bg-sound.mp3'
-import clickSound from './assets/audio/click-sound.mp3'
+import { ref, onMounted, computed } from "vue"
+import bgSound from "./assets/audio/bg-sound.mp3"
+import clickSound from "./assets/audio/click-sound.mp3"
 
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref('Random Number')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
+const countdown = ref(4)
+const alertCountdown = ref(false)
+
+let autoRandomInterval = null
 
 const setLevel = (newLevel) => {
   gameStart.value = true
-  return level.value = newLevel.value
+  level.value = newLevel.value
+  if (newLevel !== "default") {
+    startAutoRandomNumber()
+  }
 }
-
 
 onMounted(() => {
   shuffleNumber()
@@ -29,7 +35,10 @@ const randomNumber = () => {
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
 
-  if (numbers.value.length === 0) randomBtnText.value = 'Out Of Number!'
+  if (numbers.value.length === 0) {
+    randomBtnText.value = "Out Of Number!"
+    clearInterval(autoRandomInterval)
+  }
   toDisabledwhileRandom.value = true
 }
 
@@ -45,7 +54,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -72,7 +81,7 @@ const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-console.log('selectedNumbers.value', selectedNumbers.value)
+console.log("selectedNumbers.value", selectedNumbers.value)
 
 const bgmusic = new Audio(bgSound)
 const toggleSound = new Audio(clickSound)
@@ -103,38 +112,72 @@ console.log(visibleNumbers)
 console.log(shuffleNumber())
 
 const checkLineWin = () => {
-
+  // code here
 }
 
-const checkBlackoutWin = ()  => {
+const checkBlackoutWin = () => {
   if (selectedNumbers.value.length !== 25) {
-    return false;
+    return false
   }
   for (let col = 0; col < 5; col++) {
-    let allMarked = true;
+    let allMarked = true
     for (let i = col; i < 25; i += 5) {
       if (!selectedNumbers.value[i]) {
-        allMarked = false;
+        allMarked = false
       }
     }
     if (allMarked) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
-      return checkLineWin();
-    case 'blackout':
-      return checkBlackoutWin();
+    case "line":
+      return checkLineWin()
+    case "blackout":
+      return checkBlackoutWin()
     default:
-      return false;
+      return false
   }
-});
+})
 
+// auto-random-number
+const startAutoRandomNumber = () => {
+  toDisabledwhileRandom.value = true
+  randomBtnText.value = "Randomizing..."
+
+  autoRandomInterval = setInterval(() => {
+    randomNumber()
+  }, 4000)
+
+  alertCountdown.value = true
+  startCountdown()
+}
+
+const startCountdown = () => {
+  let interval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(interval)
+      alertCountdown.value = false
+    }
+  }, 1000)
+}
+
+const resetGame = () => {
+  clearInterval(intervalId)
+  numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
+  usedNumber.value = []
+  selectedNumbers.value = []
+  shuffleNumber()
+  randomBtnText.value = "Random Number"
+  level.value = "default"
+  showHiddenNumbers.value = false
+  hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
+}
 </script>
 
 <template>
@@ -168,13 +211,17 @@ const hasWon = computed(() => {
         >
           Line
         </button>
-        <button @click="setLevel('blackout')" class="btn rounded hover:bg-blue-600">
+        <button
+          @click="setLevel('blackout')"
+          class="btn rounded hover:bg-blue-600"
+        >
           Black Out
         </button>
       </div>
     </div>
 
     <!-- game content -->
+
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
@@ -212,7 +259,7 @@ const hasWon = computed(() => {
           <img class="h-48 w-48" src="../src/assets/img/bingo.png" />
         </div>
 
-        <div class="flex flex-col items-center mt-6">
+        <div class="flex flex-row items-center mt-6">
           <div
             class="p-3 shadow-md rounded-full w-16 h-16 text-center border border-neutral-950 border-r-4"
           >
@@ -220,13 +267,16 @@ const hasWon = computed(() => {
               {{ usedNumber[usedNumber.length - 1] }}
             </p>
           </div>
+          <p>{{ numbers.length }}<br />Balls</p>
         </div>
 
         <div class="flex flex-row justify-center m-8">
           <button
             class="btn mr-3"
-            :disabled="randomBtnText === 'Out Of Number!'"
-            @click="randomNumber"
+            :disabled="
+              randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
+            "
+            @click="startAutoRandomNumber"
           >
             {{ randomBtnText }}
           </button>
@@ -310,6 +360,16 @@ const hasWon = computed(() => {
         </div>
       </div>
 
+      <!-- Countdown Popup -->
+      <div
+        v-show="alertCountdown"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      >
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+          <p class="text-3xl font-bold">Starting in {{ countdown }} seconds</p>
+        </div>
+      </div>
+
       <!-- Bingo Board -->
       <div class="w-1/2 flex justify-center items-center mt-24">
         <div class="w-4/5">
@@ -341,7 +401,7 @@ const hasWon = computed(() => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -350,13 +410,40 @@ const hasWon = computed(() => {
             </tbody>
           </table>
 
+          <!-- Alert BG-->
           <div
             v-show="hasWon"
-            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
-            role="alert"
+            class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-            <span class="font-medium">Success alert!</span> Change a few things
-            up and try submitting again.
+            <!-- Alert -->
+            <div
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+            >
+              <!-- Video Background -->
+              <video
+                class="absolute inset-0 w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+              >
+                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <!-- Content over Video -->
+              <div class="relative z-10 card-body text-white">
+                <h2 class="card-title">Awesome!</h2>
+                <p class="">You’re the bingo winner!</p>
+                <div class="card-actions justify-end">
+                  <button
+                    @click="resetGame"
+                    class="btn bg-yellow-400 text-white"
+                  >
+                    Play again
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -365,8 +452,118 @@ const hasWon = computed(() => {
 </template>
 
 <style scoped>
+.bounce-in-top {
+  -webkit-animation: bounce-in-top 1.1s both;
+  animation: bounce-in-top 1.1s both;
+}
+
+@-webkit-keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
+@keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
+
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
