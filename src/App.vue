@@ -20,10 +20,7 @@ let autoRandomInterval = null
 
 const setLevel = (newLevel) => {
   gameStart.value = true
-  level.value = newLevel.value
-  if (newLevel !== "default") {
-    startAutoRandomNumber()
-  }
+  level.value = newLevel
 }
 
 onMounted(() => {
