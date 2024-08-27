@@ -16,9 +16,8 @@ const showHiddenNumbers = ref(false)
 
 const setLevel = (newLevel) => {
   gameStart.value = true
-  return (level.value = newLevel)
+  return level.value = newLevel.value
 }
-
 
 
 onMounted(() => {
@@ -103,6 +102,10 @@ const hiddenNumbers = computed(() => {
 console.log(visibleNumbers)
 console.log(shuffleNumber())
 
+const checkLineWin = () => {
+
+}
+
 const checkBlackoutWin = ()  => {
   if (selectedNumbers.value.length !== 25) {
     return false;
@@ -138,7 +141,7 @@ const hasWon = computed(() => {
   <div class="relative w-full h-full">
     <!-- Video Background -->
     <video
-      class="absolute top-0 left-0 w-full h-full object-cover h-screen"
+      class="absolute top-0 left-0 w-full object-cover h-screen"
       autoplay
       loop
       muted
@@ -149,7 +152,7 @@ const hasWon = computed(() => {
     <!-- Level Selection -->
     <div
       class="absolute inset-0 flex flex-col items-center mt-28"
-      v-if="level === 'default'"
+      v-if="!gameStart"
     >
       <!-- Logo Level -->
       <div class="flex items-center">
