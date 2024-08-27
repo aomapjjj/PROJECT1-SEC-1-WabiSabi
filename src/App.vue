@@ -5,13 +5,17 @@ import clickSound from './assets/audio/click-sound.mp3'
 
 const numbers = ref(Array.from(Array(51).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref('Random Number')
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
 const level = ref('default')
 const showHiddenNumbers = ref(false)
+const countdown = ref(4)
+const alertCountdown = ref(false)
+
+let autoRandomInterval = null
 
 const setLevel = (newLevel) => {
   return (level.value = newLevel)
@@ -26,7 +30,10 @@ const randomNumber = () => {
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
 
-  if (numbers.value.length === 0) randomBtnText.value = 'Out Of Number!'
+  if (numbers.value.length === 0) {
+    randomBtnText.value = 'Out Of Number!'
+    clearInterval(autoRandomInterval)
+  }
   toDisabledwhileRandom.value = true
 }
 
@@ -99,32 +106,55 @@ const hiddenNumbers = computed(() => {
 console.log(visibleNumbers)
 console.log(shuffleNumber())
 
-const checkBalckoutWin = ()  => {
+const checkBalckoutWin = () => {
   if (selectedNumbers.value.length !== 25) {
-    return false;
+    return false
   }
   for (let col = 0; col < 5; col++) {
-    let allMarked = true;
+    let allMarked = true
     for (let i = col; i < 25; i += 5) {
       if (!selectedNumbers.value[i]) {
-        allMarked = false;
+        allMarked = false
       }
     }
     if (allMarked) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
 const hasWon = computed(() => checkBalckoutWin())
+
+// auto-random-number
+const startAutoRandomNumber = () => {
+  toDisabledwhileRandom.value = true
+  randomBtnText.value = 'Randomizing...'
+
+  autoRandomInterval = setInterval(() => {
+    randomNumber()
+  }, 4000)
+
+  alertCountdown.value = true
+  startCountdown()
+}
+
+const startCountdown = () => {
+  let interval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(interval)
+      alertCountdown.value = false
+    }
+  }, 1000)
+}
 </script>
 
 <template>
   <div class="relative w-full h-full">
     <!-- Video Background -->
     <video
-      class="absolute top-0 left-0 w-full h-full object-cover h-screen"
+      class="absolute top-0 left-0 w-full h-full object-cover"
       autoplay
       loop
       muted
@@ -158,7 +188,10 @@ const hasWon = computed(() => checkBalckoutWin())
     </div>
 
     <!-- game content -->
-    <div v-if="level==='easy'" class="relative z-10 flex flex-row w-full h-full">
+    <div
+      v-if="level === 'easy'"
+      class="relative z-10 flex flex-row w-full h-full"
+    >
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
@@ -195,7 +228,7 @@ const hasWon = computed(() => checkBalckoutWin())
           <img class="h-48 w-48" src="../src/assets/img/bingo.png" />
         </div>
 
-        <div class="flex flex-col items-center mt-6">
+        <div class="flex flex-row items-center mt-6">
           <div
             class="p-3 shadow-md rounded-full w-16 h-16 text-center border border-neutral-950 border-r-4"
           >
@@ -203,13 +236,16 @@ const hasWon = computed(() => checkBalckoutWin())
               {{ usedNumber[usedNumber.length - 1] }}
             </p>
           </div>
+          <p>{{ numbers.length }}<br />Balls</p>
         </div>
 
         <div class="flex flex-row justify-center m-8">
           <button
             class="btn mr-3"
-            :disabled="randomBtnText === 'Out Of Number!'"
-            @click="randomNumber"
+            :disabled="
+              randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
+            "
+            @click="startAutoRandomNumber"
           >
             {{ randomBtnText }}
           </button>
@@ -290,6 +326,16 @@ const hasWon = computed(() => checkBalckoutWin())
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Countdown Popup -->
+      <div
+        v-show="alertCountdown"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      >
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+          <p class="text-3xl font-bold">Starting in {{ countdown }} seconds</p>
         </div>
       </div>
 
