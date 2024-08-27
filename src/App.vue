@@ -13,6 +13,7 @@ const showAudio = ref(true)
 const level = ref('default')
 const showHiddenNumbers = ref(false)
 
+
 const setLevel = (newLevel) => {
   level.value = newLevel
   if (newLevel !== 'default') {
@@ -131,6 +132,19 @@ const checkBalckoutWin = () => {
 }
 
 const hasWon = computed(() => checkBalckoutWin())
+
+const resetGame = () => {
+  clearInterval(intervalId)
+  numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
+  usedNumber.value = []
+  selectedNumbers.value = []
+  shuffleNumber()
+  randomBtnText.value = 'Random Number'
+  level.value = 'default'
+  showHiddenNumbers.value = false
+  hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
+}
+
 </script>
 
 <template>
@@ -374,14 +388,14 @@ const hasWon = computed(() => checkBalckoutWin())
                 <h2 class="card-title">Awesome!</h2>
                 <p class="">You’re the bingo winner!</p>
                 <div class="card-actions justify-end">
-                  <button class="btn bg-yellow-400 text-white">
+                  <button @click="resetGame" class="btn bg-yellow-400 text-white">
                     Play again
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          
+
         </div>
       </div>
     </div>
