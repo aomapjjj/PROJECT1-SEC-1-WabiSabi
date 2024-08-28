@@ -109,25 +109,55 @@ console.log(visibleNumbers)
 console.log(shuffleNumber())
 
 const checkLineWin = () => {
-  // code here
+  // Check rows
+  for (let row = 0; row < 5; row++) {
+    let allMarked = true
+    for (let col = 0; col < 5; col++) {
+      if (!selectedNumbers.value[row * 5 + col]) {
+        allMarked = false
+        break
+      }
+    }
+    if (allMarked) return true
+  }
+
+  // Check columns
+  for (let col = 0; col < 5; col++) {
+    let allMarked = true
+    for (let row = 0; row < 5; row++) {
+      if (!selectedNumbers.value[row * 5 + col]) {
+        allMarked = false
+        break
+      }
+    }
+    if (allMarked) return true
+  }
+
+  // Check diagonals
+  let allMarked = true
+  for (let i = 0; i < 5; i++) {
+    if (!selectedNumbers.value[i * 5 + i]) {
+      allMarked = false
+      break
+    }
+  }
+  if (allMarked) return true
+
+  // Check Anti-diagonal
+  allMarked = true
+  for (let i = 0; i < 5; i++) {
+    if (!selectedNumbers.value[i * 5 + (4 - i)]) {
+      allMarked = false
+      break
+    }
+  }
+  if (allMarked) return true
+
+  return false
 }
 
 const checkBlackoutWin = () => {
-  if (selectedNumbers.value.length !== 25) {
-    return false
-  }
-  for (let col = 0; col < 5; col++) {
-    let allMarked = true
-    for (let i = col; i < 25; i += 5) {
-      if (!selectedNumbers.value[i]) {
-        allMarked = false
-      }
-    }
-    if (allMarked) {
-      return true
-    }
-  }
-  return false
+  return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
 const hasWon = computed(() => {
@@ -198,10 +228,11 @@ const resetGame = () => {
       <div class="flex items-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
       </div>
-      <div>
-        <h1>BINGO MODE</h1>
-      </div>
-      <div class="mt-4">
+
+      <div class="mt-10 p-4 shadow-2xl bg-gray-200 shadow-black rounded-md">
+        <div class="mb-5">
+          <h1 class="text-center">SELECT BINGO MODE</h1>
+        </div>
         <button
           @click="setLevel('line')"
           class="mr-5 btn rounded hover:bg-blue-600"
@@ -255,6 +286,15 @@ const resetGame = () => {
         <div class="flex flex-row justify-center mt-6">
           <img class="h-48 w-48" src="../src/assets/img/bingo.png" />
         </div>
+        <div class="breadcrumbs text-xl border px-5 border-black rounded-md">
+          <ul>
+            <li class="font-normal">MODE</li>
+            <li class="font-semibold">{{ level.toUpperCase() }}</li>
+            <li :style="{ color: numbers.length === 50 ? 'black' : 'red' }">
+              {{ numbers.length }} Balls Left!
+            </li>
+          </ul>
+        </div>
 
         <div class="flex flex-row items-center mt-6">
           <div
@@ -264,7 +304,6 @@ const resetGame = () => {
               {{ usedNumber[usedNumber.length - 1] }}
             </p>
           </div>
-          <p>{{ numbers.length }}<br />Balls</p>
         </div>
 
         <div class="flex flex-row justify-center m-8">
