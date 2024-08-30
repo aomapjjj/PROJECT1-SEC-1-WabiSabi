@@ -13,8 +13,10 @@ const showAudio = ref(true)
 const level = ref("default")
 const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
-const countdown = ref(4)
+const countdown = ref(1)
 const alertCountdown = ref(false)
+const showCard1 = ref(false)
+const showCard2 = ref(false)
 
 let autoRandomInterval = null
 
@@ -51,7 +53,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
+      numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -119,7 +121,9 @@ const checkLineWin = () => {
       }
     }
     if (allMarked) return true
-}
+
+  }
+
 
   // Check columns
   for (let col = 0; col < 5; col++) {
@@ -179,7 +183,7 @@ const startAutoRandomNumber = () => {
 
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 4000)
+  }, 1)
 
   alertCountdown.value = true
   startCountdown()
@@ -221,31 +225,78 @@ const resetGame = () => {
     </video>
 
     <!-- Level Selection -->
-    <div
-      class="absolute inset-0 flex flex-col items-center mt-28"
-      v-if="!gameStart"
-    >
+    <div class="absolute inset-0 flex flex-col mt-28 ml-4" v-if="!gameStart">
       <!-- Logo Level -->
-      <div class="flex items-center">
+      <!-- <div class="flex items-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
-      </div>
 
-      <div class="mt-10 p-4 shadow-2xl bg-gray-200 shadow-black rounded-md">
-        <div class="mb-5">
+      </div> -->
+
+      <!-- <div class="card bg-base-100 w-96 shadow-xl">
+        <div class="card-body items-center text-center">
           <h1 class="text-center">SELECT BINGO MODE</h1>
+          <div class="card-actions justify-end">
+            <button class="btn btn-primary" @click="setLevel('line')">Line</button>
+            <button class="btn btn-error"  @click="setLevel('blackout')"> Black Out</button>
+          </div>
         </div>
-        <button
-          @click="setLevel('line')"
-          class="mr-5 btn rounded hover:bg-blue-600"
-        >
-          Line
-        </button>
-        <button
-          @click="setLevel('blackout')"
-          class="btn rounded hover:bg-blue-600"
-        >
-          Black Out
-        </button>
+      </div> -->
+
+      <div class="text-focus-in">
+        <div class="flex items-center justify-between">
+          <div class="mt-12">
+            <h1 class="text-7xl m-5">Welcome to your Bingo!</h1>
+            <h1 class="text-7xl m-5">Challenge yourself</h1>
+            <h1 class="text-4xl text-left m-5">Start playing now!</h1>
+            <div class="flex flex-row">
+              <div ontouchstart="">
+                <div
+                  class="button"
+                  @mouseover="showCard1 = true"
+                  @mouseout="showCard1 = false"
+                >
+                  <a @click="setLevel('line')">Line</a>
+                </div>
+              </div>
+              <div ontouchstart="">
+                <div
+                  class="button"
+                  @mouseover="showCard2 = true"
+                  @mouseout="showCard2 = false"
+                >
+                  <a @click="setLevel('blackout')">Black Out</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- v-if="showCard1" -->
+          <div class="flex justify-end" v-if="showCard1">
+            <div class="card bg-base-100 w-96 shadow-xl mr-24">
+              <div class="card-body">
+                <h2 class="card-title text-2xl">Line Win Pattern</h2>
+              </div>
+              <figure>
+                <img src="./assets/img/bingoWinLine1.png" alt="Shoes" />
+              </figure>
+              <figure>
+                <img class="w-80" src="./assets/img/bingoWinLine2.png" alt="Shoes" />
+              </figure>
+            </div>
+          </div>
+
+          <div class="flex justify-end" v-if="showCard2">
+            <div class="card bg-base-100 w-96 shadow-xl mr-24">
+              <div class="card-body">
+                <h2 class="card-title text-2xl">Blackout Win Pattern</h2>
+              </div>
+              <figure>
+                <img  class=" w-96" src="./assets/img/bingoWinBlackout.png" alt="Shoes" />
+              </figure>
+             
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -438,7 +489,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1],
+                      usedNumber[usedNumber.length - 1]
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -607,5 +658,99 @@ const resetGame = () => {
 
 .bg-customRed {
   background-color: #f24452;
+}
+
+.button {
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+}
+
+.button a {
+  color: white;
+  font-family: Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 36px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #e74c3c; /* สีแดงหลัก */
+  display: block;
+  position: relative;
+  padding: 20px 40px;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 1px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
+
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.button a:active {
+  top: 10px;
+  background-color: #c0392b;
+
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+}
+
+.button:after {
+  content: "";
+  height: 100%;
+  width: 100%;
+  padding: 4px;
+  position: absolute;
+  bottom: -15px;
+  left: -4px;
+  z-index: -1;
+  background-color: #5e1d1a; /* เงาสีแดงเข้ม */
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.button a:hover {
+  background-color: #b81212;
+  color: #fff;
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  text-shadow: 0px 1px 0px #333;
+}
+
+.text-focus-in {
+  -webkit-animation: text-focus-in 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53)
+    both;
+  animation: text-focus-in 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) both;
+}
+@-webkit-keyframes text-focus-in {
+  0% {
+    -webkit-filter: blur(12px);
+    filter: blur(12px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
+}
+@keyframes text-focus-in {
+  0% {
+    -webkit-filter: blur(12px);
+    filter: blur(12px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
 }
 </style>
