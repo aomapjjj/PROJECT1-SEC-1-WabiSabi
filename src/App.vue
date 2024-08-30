@@ -51,7 +51,7 @@ const shuffleNumber = () => {
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
-    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+     [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
       numberOnBoard[currentIndex]
     ]
@@ -60,11 +60,12 @@ const shuffleNumber = () => {
   toDisabledwhileRandom.value = false
 }
 
-console.log(numberOnBoard)
+
+
+//console.log(numberOnBoard)
 
 const toggleSelection = (number) => {
   if (usedNumber.value.includes(number)) {
-    // if (number === usedNumber.value[usedNumber.value.length - 1])
     if (selectedNumbers.value.includes(number)) {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
@@ -80,7 +81,7 @@ const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-console.log("selectedNumbers.value", selectedNumbers.value)
+//console.log("selectedNumbers.value", selectedNumbers.value)
 
 const bgmusic = new Audio(bgSound)
 const toggleSound = new Audio(clickSound)
@@ -107,58 +108,66 @@ const hiddenNumbers = computed(() => {
   return usedNumber.value.slice(0)
 })
 
-console.log(visibleNumbers)
-console.log(shuffleNumber())
+//console.log(visibleNumbers)
+
 
 const checkLineWin = () => {
-  // Check rows
-  for (let row = 0; row < 5; row++) {
-    let allMarked = true
-    for (let col = 0; col < 5; col++) {
-      if (!selectedNumbers.value[row * 5 + col]) {
-        allMarked = false
-        break
+
+  // Check rows 
+  for (let row = 0; row < 5; row++) { // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
+    let allMarked = true;
+    console.log(`Checking row ${row}`);
+
+    for (let col = 0; col < 5; col++) { // อันนี้คือเช็คแต่ละ column ของ row เช่น index ที่ 5 ก็จะเป็น row 1 column 0 
+      const index = row * 5 + col; // อันนี้คือ อินเด้กของมัน
+      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) { // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
+        allMarked = false;
+        console.log(`Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`);  
       }
     }
-    if (allMarked) return true
-
+    if (allMarked) {
+      console.log(`Row ${row} is completely marked.`);
+      return true;
+    }
   }
-
 
   // Check columns
-  for (let col = 0; col < 5; col++) {
-    let allMarked = true
-    for (let row = 0; row < 5; row++) {
-      if (!selectedNumbers.value[row * 5 + col]) {
-        allMarked = false
-        break
+    for (let col = 0; col < 5; col++) { // อารมเดียวกันกะข้างบน
+      let allMarked = true
+      for (let row = 0; row < 5; row++) {
+        const index = row * 5 + col
+        if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+          allMarked = false
+        }
       }
+      if (allMarked) return true
     }
-    if (allMarked) return true
-  }
 
   // Check diagonals
   let allMarked = true
-  for (let i = 0; i < 5; i++) {
-    if (!selectedNumbers.value[i * 5 + i]) {
+  for (let i = 0; i < 5; i++) { //อันนี้หลักการเดียวกัน แต่อันนี้จะวนอาเรย์ 
+    const index = i * 5 + i //ถ้าลองคิดดูแนวทะแยงจะมีแค่ index 0 6 12 18 25 เหมือนคิดเลขนั่นแหละ
+    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) { //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-      break
+      
     }
   }
   if (allMarked) return true
 
   // Check Anti-diagonal
-  allMarked = true
-  for (let i = 0; i < 5; i++) {
-    if (!selectedNumbers.value[i * 5 + (4 - i)]) {
+  allMarked = true 
+  for (let i = 0; i < 5; i++) { // เมิลกัล
+    const index = i * 5 + (4 - i)
+    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-      break
+      
     }
   }
   if (allMarked) return true
 
   return false
 }
+
 
 const checkBlackoutWin = () => {
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
@@ -175,6 +184,7 @@ const hasWon = computed(() => {
       return false
   }
 })
+
 
 // auto-random-number
 const startAutoRandomNumber = () => {
