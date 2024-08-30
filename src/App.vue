@@ -119,7 +119,7 @@ const checkLineWin = () => {
       }
     }
     if (allMarked) return true
-  }
+}
 
   // Check columns
   for (let col = 0; col < 5; col++) {
@@ -159,6 +159,7 @@ const checkLineWin = () => {
 const checkBlackoutWin = () => {
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
+
 
 const hasWon = computed(() => {
   switch (level.value) {
