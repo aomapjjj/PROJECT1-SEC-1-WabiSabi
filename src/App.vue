@@ -1,22 +1,25 @@
 <script setup>
-import { ref, onMounted, computed } from "vue"
-import bgSound from "./assets/audio/bg-sound.mp3"
-import clickSound from "./assets/audio/click-sound.mp3"
+import { ref, onMounted, computed } from 'vue'
+import bgSound from './assets/audio/bg-sound.mp3'
+import clickSound from './assets/audio/click-sound.mp3'
 
-const numbers = ref(Array.from(Array(51).keys()).splice(1))
+const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref("Start Bingo Game")
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
-const level = ref("default")
+const level = ref('default')
 const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
 const countdown = ref(1)
 const alertCountdown = ref(false)
 const showCard1 = ref(false)
 const showCard2 = ref(false)
+const bingoTable = ref([[], [], [], [], []])
+
+
 
 let autoRandomInterval = null
 
@@ -29,20 +32,42 @@ onMounted(() => {
   shuffleNumber()
 })
 
+
+
+
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
+  console.log('numbers.value',numbers.value)
 
   if (numbers.value.length === 0) {
-    randomBtnText.value = "Out Of Number!"
+    randomBtnText.value = 'Out Of Number!'
     clearInterval(autoRandomInterval)
   }
   toDisabledwhileRandom.value = true
 }
 
+// Generate Bingo Table - ลูป 5 ครั้งตาม col B,I,N,G,O แต่ละรอบการวน จะดึงตัวเลข 15 ตัวแรกจาก numbers
+// splice ช่วยลบเลขถัดไป เช่น 1-15 แล้วไป 16-30 อะ แล้วมันก็ช่วย sort เลขด้วย
+
+const randomNumsinBorad = [...numbers.value]
+
+
+const generateBingoTable = () => {
+  for (let i = 0; i < 5; i++) {
+    bingoTable.value[i] = randomNumsinBorad.splice(0, 15)
+    
+  }
+  return bingoTable.value
+}
+console.log(generateBingoTable())
+
+
+
 let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
+
 
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
@@ -51,7 +76,7 @@ const shuffleNumber = () => {
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
-     [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
+    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
       numberOnBoard[currentIndex]
     ]
@@ -59,8 +84,6 @@ const shuffleNumber = () => {
   shuffledNumbers.value = [...numberOnBoard]
   toDisabledwhileRandom.value = false
 }
-
-
 
 //console.log(numberOnBoard)
 
@@ -110,57 +133,62 @@ const hiddenNumbers = computed(() => {
 
 //console.log(visibleNumbers)
 
-
 const checkLineWin = () => {
+  // Check rows
+  for (let row = 0; row < 5; row++) {
+    // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
+    let allMarked = true
+    // console.log(`Checking row ${row}`)
 
-  // Check rows 
-  for (let row = 0; row < 5; row++) { // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
-    let allMarked = true;
-    console.log(`Checking row ${row}`);
-
-    for (let col = 0; col < 5; col++) { // อันนี้คือเช็คแต่ละ column ของ row เช่น index ที่ 5 ก็จะเป็น row 1 column 0 
-      const index = row * 5 + col; // อันนี้คือ อินเด้กของมัน
-      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) { // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
-        allMarked = false;
-        console.log(`Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`);  
+    for (let col = 0; col < 5; col++) {
+      // อันนี้คือเช็คแต่ละ column ของ row เช่น index ที่ 5 ก็จะเป็น row 1 column 0
+      const index = row * 5 + col // อันนี้คือ อินเด้กของมัน
+      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+        // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
+        allMarked = false
+        // console.log(
+        //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
+        // )
       }
     }
     if (allMarked) {
-      console.log(`Row ${row} is completely marked.`);
-      return true;
+      console.log(`Row ${row} is completely marked.`)
+      return true
     }
   }
 
   // Check columns
-    for (let col = 0; col < 5; col++) { // อารมเดียวกันกะข้างบน
-      let allMarked = true
-      for (let row = 0; row < 5; row++) {
-        const index = row * 5 + col
-        if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
-          allMarked = false
-        }
+  for (let col = 0; col < 5; col++) {
+    // อารมเดียวกันกะข้างบน
+    let allMarked = true
+    for (let row = 0; row < 5; row++) {
+      const index = row * 5 + col
+      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+        allMarked = false
       }
-      if (allMarked) return true
     }
+    if (allMarked) return true
+  }
 
   // Check diagonals
   let allMarked = true
-  for (let i = 0; i < 5; i++) { //อันนี้หลักการเดียวกัน แต่อันนี้จะวนอาเรย์ 
+  for (let i = 0; i < 5; i++) {
+    //อันนี้หลักการเดียวกัน แต่อันนี้จะวนอาเรย์
     const index = i * 5 + i //ถ้าลองคิดดูแนวทะแยงจะมีแค่ index 0 6 12 18 25 เหมือนคิดเลขนั่นแหละ
-    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) { //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
+    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+      //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-      
     }
   }
   if (allMarked) return true
 
   // Check Anti-diagonal
-  allMarked = true 
-  for (let i = 0; i < 5; i++) { // เมิลกัล
+  allMarked = true
+  for (let i = 0; i < 5; i++) {
+    // เมิลกัล
     const index = i * 5 + (4 - i)
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-      
     }
   }
   if (allMarked) return true
@@ -168,36 +196,35 @@ const checkLineWin = () => {
   return false
 }
 
-
 const checkBlackoutWin = () => {
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
-
 const hasWon = computed(() => {
   switch (level.value) {
-    case "line":
+    case 'line':
       return checkLineWin()
-    case "blackout":
+    case 'blackout':
       return checkBlackoutWin()
     default:
       return false
   }
 })
 
-
 // auto-random-number
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = "Randomizing..."
+  randomBtnText.value = 'Randomizing...'
 
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 1)
+  }, 1000)
 
   alertCountdown.value = true
   startCountdown()
 }
+
+
 
 const startCountdown = () => {
   let interval = setInterval(() => {
@@ -209,17 +236,17 @@ const startCountdown = () => {
   }, 1000)
 }
 
-const resetGame = () => {
-  clearInterval(intervalId)
-  numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
-  usedNumber.value = []
-  selectedNumbers.value = []
-  shuffleNumber()
-  randomBtnText.value = "Random Number"
-  level.value = "default"
-  showHiddenNumbers.value = false
-  hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
-}
+// const resetGame = () => {
+//   clearInterval(intervalId)
+//   numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
+//   usedNumber.value = []
+//   selectedNumbers.value = []
+//   shuffleNumber()
+//   randomBtnText.value = 'Random Number'
+//   level.value = 'default'
+//   showHiddenNumbers.value = false
+//   hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
+// }
 </script>
 
 <template>
@@ -289,7 +316,11 @@ const resetGame = () => {
                 <img src="./assets/img/bingoWinLine1.png" alt="Shoes" />
               </figure>
               <figure>
-                <img class="w-80" src="./assets/img/bingoWinLine2.png" alt="Shoes" />
+                <img
+                  class="w-80"
+                  src="./assets/img/bingoWinLine2.png"
+                  alt="Shoes"
+                />
               </figure>
             </div>
           </div>
@@ -300,19 +331,47 @@ const resetGame = () => {
                 <h2 class="card-title text-2xl">Blackout Win Pattern</h2>
               </div>
               <figure>
-                <img  class=" w-96" src="./assets/img/bingoWinBlackout.png" alt="Shoes" />
+                <img
+                  class="w-96"
+                  src="./assets/img/bingoWinBlackout.png"
+                  alt="Shoes"
+                />
               </figure>
-             
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- game content -->
-
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
+      <!-- Generate Bingo Table -->
+       
+      <div class="w-1/2 flex flex-col justify-center items-center">
+        <div class="w-4/5">
+          <table
+            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
+          >
+            <thead>
+              <tr>
+                <th class="bg-red-500 text-white text-3xl">B</th>
+                <th class="bg-yellow-500 text-white text-3xl">I</th>
+                <th class="bg-green-500 text-white text-3xl">N</th>
+                <th class="bg-blue-500 text-white text-3xl">G</th>
+                <th class="bg-purple-500 text-white text-3xl">O</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in 15" :key="row">
+                <td v-for="col in 5" :key="col">
+                  {{ bingoTable[col - 1][row - 1] }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
@@ -467,6 +526,8 @@ const resetGame = () => {
           <p class="text-3xl font-bold">Starting in {{ countdown }} seconds</p>
         </div>
       </div>
+
+      <!-- Alert BG-->
 
       <!-- Bingo Board -->
       <div class="w-1/2 flex justify-center items-center mt-24">
@@ -661,7 +722,7 @@ const resetGame = () => {
 }
 
 .jersey-20-regular {
-  font-family: "Jersey 20", sans-serif;
+  font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -711,7 +772,7 @@ const resetGame = () => {
 }
 
 .button:after {
-  content: "";
+  content: '';
   height: 100%;
   width: 100%;
   padding: 4px;
