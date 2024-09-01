@@ -39,14 +39,14 @@ const randomNumber = () => {
   // ตรวจสอบเงื่อนไขแพ้
   if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
     clearInterval(autoRandomInterval)
-    showAlert.value = true
+    showAlertLose.value = true
   }
 
 
   if (numbers.value.length === 0) {
     randomBtnText.value = 'Out Of Number!'
     clearInterval(autoRandomInterval)
-    showAlert.value = true
+    showAlertLose.value = true
   }
   toDisabledwhileRandom.value = true
 }
@@ -232,17 +232,19 @@ const startCountdown = () => {
   }, 1000)
 }
 
-const showAlert = ref(false)
+const showAlertLose = ref(false)
+const showAlertWin = ref(false)
 
 const handleBingoClick = () => {
   if (hasWon.value) {
-    showAlert.value = true
+    showAlertWin.value = true
   }
 }
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
-  showAlert.value = false
+  showAlertWin.value = false
+  showAlertLose.value = false
   hasWon.value = false // รีเซ็ตสถานะการชนะ
   gameStart.value = false
   usedNumber.value = []
@@ -584,7 +586,7 @@ const resetGame = () => {
 
           <!-- Alert Win -->
           <div
-            v-show="showAlert"
+            v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
             <!-- Alert -->
@@ -620,7 +622,7 @@ const resetGame = () => {
 
           <!-- Alert lose -->
           <div
-            v-show="showAlert"
+            v-show="showAlertLose"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
             <!-- Alert -->
