@@ -1,20 +1,23 @@
 <script setup>
-import { ref, onMounted, computed } from "vue"
-import bgSound from "./assets/audio/bg-sound.mp3"
-import clickSound from "./assets/audio/click-sound.mp3"
+import { ref, onMounted, computed } from 'vue'
+import bgSound from './assets/audio/bg-sound.mp3'
+import clickSound from './assets/audio/click-sound.mp3'
 
-const numbers = ref(Array.from(Array(51).keys()).splice(1))
+const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref("Start Bingo Game")
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const showAudio = ref(true)
-const level = ref("default")
+const level = ref('default')
 const gameStart = ref(false)
 const showHiddenNumbers = ref(false)
-const countdown = ref(4)
+const countdown = ref(1)
 const alertCountdown = ref(false)
+const showCard1 = ref(false)
+const showCard2 = ref(false)
+const bingoTable = ref([[], [], [], [], []])
 
 let autoRandomInterval = null
 
@@ -31,13 +34,35 @@ const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
+  console.log('numbers.value', numbers.value)
+
+  // ตรวจสอบเงื่อนไขแพ้
+  if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
+    clearInterval(autoRandomInterval)
+    showAlert.value = true
+  }
+
 
   if (numbers.value.length === 0) {
-    randomBtnText.value = "Out Of Number!"
+    randomBtnText.value = 'Out Of Number!'
     clearInterval(autoRandomInterval)
+    showAlert.value = true
   }
   toDisabledwhileRandom.value = true
 }
+
+// Generate Bingo Table - ลูป 5 ครั้งตาม col B,I,N,G,O แต่ละรอบการวน จะดึงตัวเลข 15 ตัวแรกจาก numbers
+// splice ช่วยลบเลขถัดไป เช่น 1-15 แล้วไป 16-30 อะ แล้วมันก็ช่วย sort เลขด้วย
+
+const randomNumsinBorad = [...numbers.value]
+
+const generateBingoTable = () => {
+  for (let i = 0; i < 5; i++) {
+    bingoTable.value[i] = randomNumsinBorad.splice(0, 15)
+  }
+  return bingoTable.value
+}
+console.log(generateBingoTable())
 
 let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
@@ -51,18 +76,17 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
+      numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
   toDisabledwhileRandom.value = false
 }
 
-console.log(numberOnBoard)
+//console.log(numberOnBoard)
 
 const toggleSelection = (number) => {
   if (usedNumber.value.includes(number)) {
-    // if (number === usedNumber.value[usedNumber.value.length - 1])
     if (selectedNumbers.value.includes(number)) {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
@@ -78,7 +102,7 @@ const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-console.log("selectedNumbers.value", selectedNumbers.value)
+//console.log("selectedNumbers.value", selectedNumbers.value)
 
 const bgmusic = new Audio(bgSound)
 const toggleSound = new Audio(clickSound)
@@ -105,29 +129,40 @@ const hiddenNumbers = computed(() => {
   return usedNumber.value.slice(0)
 })
 
-console.log(visibleNumbers)
-console.log(shuffleNumber())
+//console.log(visibleNumbers)
 
 const checkLineWin = () => {
   // Check rows
   for (let row = 0; row < 5; row++) {
+    // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
     let allMarked = true
+    // console.log(`Checking row ${row}`)
+
     for (let col = 0; col < 5; col++) {
-      if (!selectedNumbers.value[row * 5 + col]) {
+      // อันนี้คือเช็คแต่ละ column ของ row เช่น index ที่ 5 ก็จะเป็น row 1 column 0
+      const index = row * 5 + col // อันนี้คือ อินเด้กของมัน
+      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+        // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
-        break
+        // console.log(
+        //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
+        // )
       }
     }
-    if (allMarked) return true
-}
+    if (allMarked) {
+      console.log(`Row ${row} is completely marked.`)
+      return true
+    }
+  }
 
   // Check columns
   for (let col = 0; col < 5; col++) {
+    // อารมเดียวกันกะข้างบน
     let allMarked = true
     for (let row = 0; row < 5; row++) {
-      if (!selectedNumbers.value[row * 5 + col]) {
+      const index = row * 5 + col
+      if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         allMarked = false
-        break
       }
     }
     if (allMarked) return true
@@ -136,9 +171,11 @@ const checkLineWin = () => {
   // Check diagonals
   let allMarked = true
   for (let i = 0; i < 5; i++) {
-    if (!selectedNumbers.value[i * 5 + i]) {
+    //อันนี้หลักการเดียวกัน แต่อันนี้จะวนอาเรย์
+    const index = i * 5 + i //ถ้าลองคิดดูแนวทะแยงจะมีแค่ index 0 6 12 18 25 เหมือนคิดเลขนั่นแหละ
+    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
+      //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-      break
     }
   }
   if (allMarked) return true
@@ -146,9 +183,10 @@ const checkLineWin = () => {
   // Check Anti-diagonal
   allMarked = true
   for (let i = 0; i < 5; i++) {
-    if (!selectedNumbers.value[i * 5 + (4 - i)]) {
+    // เมิลกัล
+    const index = i * 5 + (4 - i)
+    if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-      break
     }
   }
   if (allMarked) return true
@@ -160,12 +198,11 @@ const checkBlackoutWin = () => {
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
-
 const hasWon = computed(() => {
   switch (level.value) {
-    case "line":
+    case 'line':
       return checkLineWin()
-    case "blackout":
+    case 'blackout':
       return checkBlackoutWin()
     default:
       return false
@@ -175,11 +212,11 @@ const hasWon = computed(() => {
 // auto-random-number
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = "Randomizing..."
+  randomBtnText.value = 'Randomizing...'
 
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 4000)
+  }, 1000)
 
   alertCountdown.value = true
   startCountdown()
@@ -195,16 +232,24 @@ const startCountdown = () => {
   }, 1000)
 }
 
+const showAlert = ref(false)
+
+const handleBingoClick = () => {
+  if (hasWon.value) {
+    showAlert.value = true
+  }
+}
+
+// ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
-  clearInterval(intervalId)
-  numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
+  showAlert.value = false
+  hasWon.value = false // รีเซ็ตสถานะการชนะ
+  gameStart.value = false
   usedNumber.value = []
   selectedNumbers.value = []
   shuffleNumber()
-  randomBtnText.value = "Random Number"
-  level.value = "default"
-  showHiddenNumbers.value = false
-  hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
+  randomBtnText.value = 'Start Bingo Game'
+  numbers.value = Array.from(Array(76).keys()).splice(1)
 }
 </script>
 
@@ -221,37 +266,116 @@ const resetGame = () => {
     </video>
 
     <!-- Level Selection -->
-    <div
-      class="absolute inset-0 flex flex-col items-center mt-28"
-      v-if="!gameStart"
-    >
+    <div class="absolute inset-0 flex flex-col mt-28 ml-4" v-if="!gameStart">
       <!-- Logo Level -->
-      <div class="flex items-center">
+      <!-- <div class="flex items-center">
         <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
-      </div>
 
-      <div class="mt-10 p-4 shadow-2xl bg-gray-200 shadow-black rounded-md">
-        <div class="mb-5">
+      </div> -->
+
+      <!-- <div class="card bg-base-100 w-96 shadow-xl">
+        <div class="card-body items-center text-center">
           <h1 class="text-center">SELECT BINGO MODE</h1>
+          <div class="card-actions justify-end">
+            <button class="btn btn-primary" @click="setLevel('line')">Line</button>
+            <button class="btn btn-error"  @click="setLevel('blackout')"> Black Out</button>
+          </div>
         </div>
-        <button
-          @click="setLevel('line')"
-          class="mr-5 btn rounded hover:bg-blue-600"
-        >
-          Line
-        </button>
-        <button
-          @click="setLevel('blackout')"
-          class="btn rounded hover:bg-blue-600"
-        >
-          Black Out
-        </button>
+      </div> -->
+
+      <div class="text-focus-in">
+        <div class="flex items-center justify-between">
+          <div class="mt-12">
+            <h1 class="text-7xl m-5">Welcome to your Bingo!</h1>
+            <h1 class="text-7xl m-5">Challenge yourself</h1>
+            <h1 class="text-4xl text-left m-5">Start playing now!</h1>
+            <div class="flex flex-row">
+              <div ontouchstart="">
+                <div
+                  class="button"
+                  @mouseover="showCard1 = true"
+                  @mouseout="showCard1 = false"
+                >
+                  <a @click="setLevel('line')">Line</a>
+                </div>
+              </div>
+              <div ontouchstart="">
+                <div
+                  class="button"
+                  @mouseover="showCard2 = true"
+                  @mouseout="showCard2 = false"
+                >
+                  <a @click="setLevel('blackout')">Black Out</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- v-if="showCard1" -->
+          <div class="flex justify-end" v-if="showCard1">
+            <div class="card bg-base-100 w-96 shadow-xl mr-24">
+              <div class="card-body">
+                <h2 class="card-title text-2xl">Line Win Pattern</h2>
+              </div>
+              <figure>
+                <img src="./assets/img/bingoWinLine1.png" alt="Shoes" />
+              </figure>
+              <figure>
+                <img
+                  class="w-80"
+                  src="./assets/img/bingoWinLine2.png"
+                  alt="Shoes"
+                />
+              </figure>
+            </div>
+          </div>
+
+          <div class="flex justify-end" v-if="showCard2">
+            <div class="card bg-base-100 w-96 shadow-xl mr-24">
+              <div class="card-body">
+                <h2 class="card-title text-2xl">Blackout Win Pattern</h2>
+              </div>
+              <figure>
+                <img
+                  class="w-96"
+                  src="./assets/img/bingoWinBlackout.png"
+                  alt="Shoes"
+                />
+              </figure>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- game content -->
-
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
+      <!-- Generate Bingo Table -->
+
+      <div class="w-1/2 flex flex-col justify-center items-center">
+        <div class="w-4/5">
+          <table
+            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
+          >
+            <thead>
+              <tr>
+                <th class="bg-red-500 text-white text-3xl">B</th>
+                <th class="bg-yellow-500 text-white text-3xl">I</th>
+                <th class="bg-green-500 text-white text-3xl">N</th>
+                <th class="bg-blue-500 text-white text-3xl">G</th>
+                <th class="bg-purple-500 text-white text-3xl">O</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in 15" :key="row">
+                <td v-for="col in 5" :key="col">
+                  {{ bingoTable[col - 1][row - 1] }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
@@ -438,7 +562,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1],
+                      usedNumber[usedNumber.length - 1]
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -447,9 +571,20 @@ const resetGame = () => {
             </tbody>
           </table>
 
-          <!-- Alert BG-->
+          <!-- Add Bingo! button below the Bingo board -->
+          <div class="w-full flex justify-center items-center m-2">
+            <button
+              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl"
+              :disabled="!hasWon"
+              @click="handleBingoClick"
+            >
+              Bingo!
+            </button>
+          </div>
+
+          <!-- Alert Win -->
           <div
-            v-show="hasWon"
+            v-show="showAlert"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
             <!-- Alert -->
@@ -471,6 +606,42 @@ const resetGame = () => {
               <div class="relative z-10 card-body text-white">
                 <h2 class="card-title">Awesome!</h2>
                 <p class="">You’re the bingo winner!</p>
+                <div class="card-actions justify-end">
+                  <button
+                    @click="resetGame"
+                    class="btn bg-yellow-400 text-white"
+                  >
+                    Play again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert lose -->
+          <div
+            v-show="showAlert"
+            class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
+          >
+            <!-- Alert -->
+            <div
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+            >
+              <!-- Video Background -->
+              <video
+                class="absolute inset-0 w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+              >
+                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <!-- Content over Video -->
+              <div class="relative z-10 card-body text-white">
+                <h2 class="card-title">You Lose!</h2>
+                <p class="">Better luck next time</p>
                 <div class="card-actions justify-end">
                   <button
                     @click="resetGame"
@@ -600,12 +771,106 @@ const resetGame = () => {
 }
 
 .jersey-20-regular {
-  font-family: "Jersey 20", sans-serif;
+  font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
 
 .bg-customRed {
   background-color: #f24452;
+}
+
+.button {
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+}
+
+.button a {
+  color: white;
+  font-family: Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 36px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #e74c3c; /* สีแดงหลัก */
+  display: block;
+  position: relative;
+  padding: 20px 40px;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 1px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
+
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, 0 10px 0 #8b0000;
+
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.button a:active {
+  top: 10px;
+  background-color: #c0392b;
+
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
+}
+
+.button:after {
+  content: '';
+  height: 100%;
+  width: 100%;
+  padding: 4px;
+  position: absolute;
+  bottom: -15px;
+  left: -4px;
+  z-index: -1;
+  background-color: #5e1d1a; /* เงาสีแดงเข้ม */
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.button a:hover {
+  background-color: #b81212;
+  color: #fff;
+  -webkit-box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  -moz-box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  box-shadow: inset 0 1px 0 #ffccc7, 0 8px 0 #8b0000;
+  text-shadow: 0px 1px 0px #333;
+}
+
+.text-focus-in {
+  -webkit-animation: text-focus-in 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53)
+    both;
+  animation: text-focus-in 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) both;
+}
+@-webkit-keyframes text-focus-in {
+  0% {
+    -webkit-filter: blur(12px);
+    filter: blur(12px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
+}
+@keyframes text-focus-in {
+  0% {
+    -webkit-filter: blur(12px);
+    filter: blur(12px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
 }
 </style>
