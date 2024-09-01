@@ -36,9 +36,17 @@ const randomNumber = () => {
   usedNumber.value.push(number)
   console.log('numbers.value', numbers.value)
 
+  // ตรวจสอบเงื่อนไขแพ้
+  if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
+    clearInterval(autoRandomInterval)
+    showAlert.value = true
+  }
+
+
   if (numbers.value.length === 0) {
     randomBtnText.value = 'Out Of Number!'
     clearInterval(autoRandomInterval)
+    showAlert.value = true
   }
   toDisabledwhileRandom.value = true
 }
@@ -229,18 +237,20 @@ const showAlert = ref(false)
 const handleBingoClick = () => {
   if (hasWon.value) {
     showAlert.value = true
-    
   }
 }
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
-  
   showAlert.value = false
   hasWon.value = false // รีเซ็ตสถานะการชนะ
   gameStart.value = false
+  usedNumber.value = []
+  selectedNumbers.value = []
+  shuffleNumber()
+  randomBtnText.value = 'Start Bingo Game'
+  numbers.value = Array.from(Array(76).keys()).splice(1)
 }
-
 </script>
 
 <template>
@@ -562,7 +572,7 @@ const resetGame = () => {
           </table>
 
           <!-- Add Bingo! button below the Bingo board -->
-          <div class="w-full flex justify-center items-center m-4">
+          <div class="w-full flex justify-center items-center m-2">
             <button
               class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl"
               :disabled="!hasWon"
@@ -608,6 +618,41 @@ const resetGame = () => {
             </div>
           </div>
 
+          <!-- Alert lose -->
+          <div
+            v-show="showAlert"
+            class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
+          >
+            <!-- Alert -->
+            <div
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+            >
+              <!-- Video Background -->
+              <video
+                class="absolute inset-0 w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+              >
+                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <!-- Content over Video -->
+              <div class="relative z-10 card-body text-white">
+                <h2 class="card-title">You Lose!</h2>
+                <p class="">Better luck next time</p>
+                <div class="card-actions justify-end">
+                  <button
+                    @click="resetGame"
+                    class="btn bg-yellow-400 text-white"
+                  >
+                    Play again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
