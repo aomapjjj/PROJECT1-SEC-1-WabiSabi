@@ -19,8 +19,6 @@ const showCard1 = ref(false)
 const showCard2 = ref(false)
 const bingoTable = ref([[], [], [], [], []])
 
-
-
 let autoRandomInterval = null
 
 const setLevel = (newLevel) => {
@@ -32,18 +30,23 @@ onMounted(() => {
   shuffleNumber()
 })
 
-
-
-
 const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
-  console.log('numbers.value',numbers.value)
+  console.log('numbers.value', numbers.value)
+
+  // ตรวจสอบเงื่อนไขแพ้
+  if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
+    clearInterval(autoRandomInterval)
+    showAlertLose.value = true
+  }
+
 
   if (numbers.value.length === 0) {
     randomBtnText.value = 'Out Of Number!'
     clearInterval(autoRandomInterval)
+    showAlertLose.value = true
   }
   toDisabledwhileRandom.value = true
 }
@@ -53,21 +56,16 @@ const randomNumber = () => {
 
 const randomNumsinBorad = [...numbers.value]
 
-
 const generateBingoTable = () => {
   for (let i = 0; i < 5; i++) {
     bingoTable.value[i] = randomNumsinBorad.splice(0, 15)
-    
   }
   return bingoTable.value
 }
 console.log(generateBingoTable())
 
-
-
 let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
 numberOnBoard.shift()
-
 
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
@@ -224,8 +222,6 @@ const startAutoRandomNumber = () => {
   startCountdown()
 }
 
-
-
 const startCountdown = () => {
   let interval = setInterval(() => {
     countdown.value--
@@ -236,17 +232,27 @@ const startCountdown = () => {
   }, 1000)
 }
 
-// const resetGame = () => {
-//   clearInterval(intervalId)
-//   numbers.value = Array.from({ length: 51 }, (_, i) => i + 1)
-//   usedNumber.value = []
-//   selectedNumbers.value = []
-//   shuffleNumber()
-//   randomBtnText.value = 'Random Number'
-//   level.value = 'default'
-//   showHiddenNumbers.value = false
-//   hasWon.value = false // ซ่อนโมดอลเมื่อเริ่มเกมใหม่
-// }
+const showAlertLose = ref(false)
+const showAlertWin = ref(false)
+
+const handleBingoClick = () => {
+  if (hasWon.value) {
+    showAlertWin.value = true
+  }
+}
+
+// ฟังก์ชันที่ใช้รีเซ็ตเกม
+const resetGame = () => {
+  showAlertWin.value = false
+  showAlertLose.value = false
+  hasWon.value = false // รีเซ็ตสถานะการชนะ
+  gameStart.value = false
+  usedNumber.value = []
+  selectedNumbers.value = []
+  shuffleNumber()
+  randomBtnText.value = 'Start Bingo Game'
+  numbers.value = Array.from(Array(76).keys()).splice(1)
+}
 </script>
 
 <template>
@@ -346,7 +352,7 @@ const startCountdown = () => {
     <!-- game content -->
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <!-- Generate Bingo Table -->
-       
+
       <div class="w-1/2 flex flex-col justify-center items-center">
         <div class="w-4/5">
           <table
@@ -527,8 +533,6 @@ const startCountdown = () => {
         </div>
       </div>
 
-      <!-- Alert BG-->
-
       <!-- Bingo Board -->
       <div class="w-1/2 flex justify-center items-center mt-24">
         <div class="w-4/5">
@@ -569,9 +573,20 @@ const startCountdown = () => {
             </tbody>
           </table>
 
-          <!-- Alert BG-->
+          <!-- Add Bingo! button below the Bingo board -->
+          <div class="w-full flex justify-center items-center m-2">
+            <button
+              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl"
+              :disabled="!hasWon"
+              @click="handleBingoClick"
+            >
+              Bingo!
+            </button>
+          </div>
+
+          <!-- Alert Win -->
           <div
-            v-show="hasWon"
+            v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
             <!-- Alert -->
@@ -593,6 +608,42 @@ const startCountdown = () => {
               <div class="relative z-10 card-body text-white">
                 <h2 class="card-title">Awesome!</h2>
                 <p class="">You’re the bingo winner!</p>
+                <div class="card-actions justify-end">
+                  <button
+                    @click="resetGame"
+                    class="btn bg-yellow-400 text-white"
+                  >
+                    Play again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert lose -->
+          <div
+            v-show="showAlertLose"
+            class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
+          >
+            <!-- Alert -->
+            <div
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+            >
+              <!-- Video Background -->
+              <video
+                class="absolute inset-0 w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+              >
+                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <!-- Content over Video -->
+              <div class="relative z-10 card-body text-white">
+                <h2 class="card-title">You Lose!</h2>
+                <p class="">Better luck next time</p>
                 <div class="card-actions justify-end">
                   <button
                     @click="resetGame"
