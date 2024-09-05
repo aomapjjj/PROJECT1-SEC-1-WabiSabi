@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted, computed, watch } from 'vue'
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const drawnNumbers = ref([])
 const usedNumber = ref([])
-const randomBtnText = ref("Start Bingo Game")
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref("default")
+const level = ref('default')
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -48,27 +48,31 @@ const select36Numbers = () => {
 select36Numbers()
 
 const randomNumber = () => {
+  // ถ้าไม่มีตัวเลขเหลือ ให้แสดงข้อความและจบการทำงาน
   if (drawnNumbers.value.length === 0) {
-    randomBtnText.value = "Out Of Number!"
-    clearInterval(autoRandomInterval)
-    showAlertLose.value = true
-    loseSoundPlay()
+    randomBtnText.value = 'Out Of Number!'
+    clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
+    showAlertLose.value = true // แสดงข้อความว่าแพ้
+    loseSoundPlay() // เล่นเสียงแพ้
     return // จบการทำงานทันทีเมื่อไม่มีตัวเลขเหลือ
   }
 
+  // สุ่ม index ของตัวเลขจาก drawnNumbers
   let randomIndex = Math.floor(Math.random() * drawnNumbers.value.length)
-  let number = drawnNumbers.value.splice(randomIndex, 1)[0]
-  usedNumber.value.push(number)
-  numberWhileRandom.value = number
+  let number = drawnNumbers.value.splice(randomIndex, 1)[0] // ลบตัวเลขที่สุ่มออกจาก array
+  usedNumber.value.push(number) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ใช้แล้ว
+  numberWhileRandom.value = number // ตั้งค่าตัวเลขปัจจุบันเพื่อแสดง
 
-  toDisabledwhileRandom.value = true // ปิดการกดปุ่มขณะสุ่ม
+  toDisabledwhileRandom.value = true // ปิดการกดปุ่มขณะสุ่มตัวเลข
 }
 
+// ฟังก์ชัน watch ตัวเลขขณะสุ่ม
 watch(numberWhileRandom, (newValue) => {
   if (newValue !== null) {
-    highlightedNumbers.value.push(newValue)
+    highlightedNumbers.value.push(newValue) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ถูกไฮไลต์
   }
 })
+
 
 const isHighlighted = (number) => {
   return highlightedNumbers.value.includes(number)
@@ -98,7 +102,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
+      numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -126,7 +130,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref("")
+const musicPlayer = ref('')
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -136,19 +140,19 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref("")
+const clicksound = ref('')
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref("")
+const loseSoundEffect = ref('')
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref("")
+const winSoundEffect = ref('')
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
@@ -158,7 +162,7 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
 })
 
-console.log("visibleNumbers" + usedNumber.value)
+console.log('visibleNumbers' + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -231,28 +235,34 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case "line":
+    case 'line':
       return checkLineWin()
-    case "blackout":
+    case 'blackout':
       return checkBlackoutWin()
     default:
       return false
   }
 })
 
-// auto-random-number
+const isResuming = ref(false)
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = "Randomizing..."
+  randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
     randomNumber()
   }, 1000)
 
-
-  alertCountdown.value = true
-  startCountdown()
+  // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
+  if (!isResuming.value) {
+    alertCountdown.value = true
+    startCountdown()
+  } else {
+    isResuming.value = false // Reset ค่าหลังจาก resume แล้ว
+  }
+  
   showWhileRandom.value = true
 }
+
 
 const startCountdown = () => {
   let interval = setInterval(() => {
@@ -286,7 +296,7 @@ const resetGame = () => {
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
   select36Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = "Start Bingo Game"
+  randomBtnText.value = 'Start Bingo Game'
   toDisabledwhileRandom.value = false
   countdown.value = 4
   alertCountdown.value = false
@@ -296,6 +306,29 @@ const resetGame = () => {
   numberWhileRandom.value = null
   clearInterval(autoRandomInterval)
   autoRandomInterval = null
+}
+
+const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
+
+// ฟังก์ชัน pause เกม
+const pauseGame = () => {
+  if (autoRandomInterval) {
+    clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
+    autoRandomInterval = null
+    gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
+    randomBtnText.value = 'Game Paused'
+  }
+}
+
+// ฟังก์ชัน resume เกม
+const resumeGame = () => {
+  if (gamePaused.value) {
+    isResuming.value = true
+    startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
+    gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
+    randomBtnText.value = 'Randomizing...'
+    
+  }
 }
 </script>
 
@@ -590,13 +623,11 @@ const resetGame = () => {
                 v-for="col in 5"
                 :key="col"
                 class="border border-black"
-
                 :class="
                   isHighlighted(bingoTable[col - 1][row - 1])
                     ? 'highlighted-cell'
                     : ''
                 "
-
               >
                 {{ bingoTable[col - 1][row - 1] }}
               </td>
@@ -677,17 +708,44 @@ const resetGame = () => {
           </div>
         </div>
 
+        <!-- header button -->
         <div class="flex flex-row justify-center m-8">
-          <button class="btn mr-3 btn-error">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
+          <!-- pause btn -->
+          <div>
+            <!-- Pause  -->
+            <button
+              class="btn mr-3 btn-error"
+              @click="pauseGame"
+              :disabled="gamePaused"
             >
-              <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                
+                <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
+              </svg>
+            </button>
+
+            <!-- Resume  -->
+            <button
+              class="btn mr-3 btn-success"
+              @click="resumeGame"
+              :disabled="!gamePaused"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <!-- ไอคอน resume (play icon) -->
+                <path fill="#ffffff" d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+          </div>
 
           <button
             class="btn mr-3"
@@ -791,7 +849,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1],
+                      usedNumber[usedNumber.length - 1]
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -816,7 +874,6 @@ const resetGame = () => {
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -1014,7 +1071,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: "Jersey 20", sans-serif;
+  font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1063,7 +1120,7 @@ th {
 }
 
 .button:after {
-  content: "";
+  content: '';
   height: 100%;
   width: 100%;
   padding: 4px;
