@@ -98,7 +98,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -247,6 +247,7 @@ const startAutoRandomNumber = () => {
   autoRandomInterval = setInterval(() => {
     randomNumber()
   }, 1000)
+
 
   alertCountdown.value = true
   startCountdown()
@@ -589,11 +590,13 @@ const resetGame = () => {
                 v-for="col in 5"
                 :key="col"
                 class="border border-black"
+
                 :class="
                   isHighlighted(bingoTable[col - 1][row - 1])
                     ? 'highlighted-cell'
                     : ''
                 "
+
               >
                 {{ bingoTable[col - 1][row - 1] }}
               </td>
@@ -788,7 +791,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -813,6 +816,7 @@ const resetGame = () => {
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
+
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
