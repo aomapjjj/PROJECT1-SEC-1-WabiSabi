@@ -93,7 +93,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -158,7 +158,6 @@ console.log("visibleNumbers" + usedNumber.value)
 //console.log(visibleNumbers)
 
 const checkLineWin = () => {
-
   // Check rows
   for (let row = 0; row < 5; row++) {
     // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
@@ -171,7 +170,7 @@ const checkLineWin = () => {
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
-        
+
         // console.log(
         //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
         // )
@@ -181,8 +180,6 @@ const checkLineWin = () => {
       console.log(`Row ${row} is completely marked.`)
       return true
     }
-
-
   }
 
   // Check columns
@@ -193,7 +190,6 @@ const checkLineWin = () => {
       const index = row * 5 + col
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         allMarked = false
-    
       }
     }
     if (allMarked) return true
@@ -207,7 +203,6 @@ const checkLineWin = () => {
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -219,7 +214,6 @@ const checkLineWin = () => {
     const index = i * 5 + (4 - i)
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -248,7 +242,7 @@ const startAutoRandomNumber = () => {
   randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 500)
+  }, 1000)
 
   alertCountdown.value = true
   startCountdown()
@@ -272,7 +266,6 @@ const handleBingoClick = () => {
   if (hasWon.value) {
     winSoundPlay()
     showAlertWin.value = true
-
   }
 }
 
@@ -288,9 +281,6 @@ const resetGame = () => {
   randomBtnText.value = "Start Bingo Game"
   numbers.value = Array.from(Array(76).keys()).splice(1)
 }
-
-
-
 </script>
 
 <template>
@@ -587,7 +577,7 @@ const resetGame = () => {
                 :class="{
                   'highlighted-cell': isHighlighted(
                     bingoTable[col - 1][row - 1]
-                  )
+                  ),
                 }"
               >
                 {{ bingoTable[col - 1][row - 1] }}
@@ -647,7 +637,9 @@ const resetGame = () => {
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
-            <li :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }">
+            <li
+              :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }"
+            >
               {{ drawnNumbers.length }} Balls Left!
             </li>
           </ul>
@@ -776,7 +768,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -801,8 +793,7 @@ const resetGame = () => {
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-
-          <audio controls ref="winSoundEffect" class="hidden" >
+            <audio controls ref="winSoundEffect" class="hidden">
               <source src="/audio/winsound.mp3" type="audio/mp3" />
             </audio>
             <!-- Alert -->
@@ -841,7 +832,7 @@ const resetGame = () => {
             v-show="showAlertLose"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-            <audio controls ref="loseSoundEffect" class="hidden" >
+            <audio controls ref="loseSoundEffect" class="hidden">
               <source src="/audio/losesound.mp3" type="audio/mp3" />
             </audio>
 
