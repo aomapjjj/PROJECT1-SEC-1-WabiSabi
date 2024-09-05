@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue"
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
+const drawnNumbers = ref([])
 const usedNumber = ref([])
 const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
@@ -32,26 +33,29 @@ onMounted(() => {
   shuffleNumber()
 })
 
+// Randomly select 36 unique numbers
+const select36Numbers = () => {
+  while (drawnNumbers.value.length < 35) {
+    let randomIndex = Math.floor(Math.random() * numbers.value.length)
+    let number = numbers.value.splice(randomIndex, 1)[0]
+    drawnNumbers.value.push(number)
+  }
+}
+
+select36Numbers()
+
 const randomNumber = () => {
-  let randomIndex = Math.floor(Math.random() * numbers.value.length)
-  let number = numbers.value.splice(randomIndex, 1)[0]
+  let randomIndex = Math.floor(Math.random() * drawnNumbers.value.length)
+  let number = drawnNumbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
   numberWhileRandom.value = number
 
-  // ตรวจสอบเงื่อนไขแพ้
-  if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
-    clearInterval(autoRandomInterval)
-    showAlertLose.value = true
-    loseSoundPlay()
-  }
-
-  if (numbers.value.length === 0) {
+  if (drawnNumbers.value.length === 0) {
     randomBtnText.value = "Out Of Number!"
     clearInterval(autoRandomInterval)
     showAlertLose.value = true
     loseSoundPlay()
   }
-  
   toDisabledwhileRandom.value = true
 }
 
@@ -77,7 +81,7 @@ const generateBingoTable = () => {
 }
 console.log(generateBingoTable())
 
-let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
+let numberOnBoard = Array.apply(null, { length: 76 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 const shuffleNumber = () => {
@@ -244,7 +248,7 @@ const startAutoRandomNumber = () => {
   randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 2000)
+  }, 500)
 
   alertCountdown.value = true
   startCountdown()
@@ -643,8 +647,8 @@ const resetGame = () => {
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
-            <li :style="{ color: numbers.length === 50 ? 'black' : 'red' }">
-              {{ numbers.length }} Balls Left!
+            <li :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }">
+              {{ drawnNumbers.length }} Balls Left!
             </li>
           </ul>
         </div>
