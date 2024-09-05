@@ -248,7 +248,7 @@ const startAutoRandomNumber = () => {
   randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 500)
+  }, 5000)
 
   alertCountdown.value = true
   startCountdown()
@@ -763,7 +763,7 @@ const resetGame = () => {
             </thead>
             <tbody>
               <tr v-for="i in 5" :key="i">
-                <td
+                <td class="text-4xl"
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
