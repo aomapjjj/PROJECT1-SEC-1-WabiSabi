@@ -37,13 +37,13 @@ onMounted(() => {
 const select36Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
   let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
-  while (drawnNumbers.value.length < 60) { // เราต้องการ 36 ตัวเลข ไม่ใช่ 35
+  while (drawnNumbers.value.length < 60) {
+    // เราต้องการ 36 ตัวเลข ไม่ใช่ 35
     let randomIndex = Math.floor(Math.random() * availableNumbers.length)
     let number = availableNumbers.splice(randomIndex, 1)[0]
     drawnNumbers.value.push(number)
   }
 }
-
 
 select36Numbers()
 
@@ -151,8 +151,8 @@ const loseSoundPlay = () => {
 const winSoundEffect = ref("")
 
 const winSoundPlay = () => {
-    winSoundEffect.value.play()
-  }
+  winSoundEffect.value.play()
+}
 
 const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
@@ -163,7 +163,6 @@ console.log("visibleNumbers" + usedNumber.value)
 //console.log(visibleNumbers)
 
 const checkLineWin = () => {
-
   // Check rows
   for (let row = 0; row < 5; row++) {
     // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
@@ -176,7 +175,7 @@ const checkLineWin = () => {
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
-        
+
         // console.log(
         //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
         // )
@@ -186,8 +185,6 @@ const checkLineWin = () => {
       console.log(`Row ${row} is completely marked.`)
       return true
     }
-
-
   }
 
   // Check columns
@@ -198,7 +195,6 @@ const checkLineWin = () => {
       const index = row * 5 + col
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         allMarked = false
-    
       }
     }
     if (allMarked) return true
@@ -212,7 +208,6 @@ const checkLineWin = () => {
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -224,7 +219,6 @@ const checkLineWin = () => {
     const index = i * 5 + (4 - i)
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -276,7 +270,6 @@ const handleBingoClick = () => {
   if (hasWon.value) {
     winSoundPlay()
     showAlertWin.value = true
-
   }
 }
 
@@ -303,8 +296,6 @@ const resetGame = () => {
   clearInterval(autoRandomInterval)
   autoRandomInterval = null
 }
-
-
 </script>
 
 <template>
@@ -567,7 +558,7 @@ const resetGame = () => {
     </div>
 
     <!-- game content -->
-    <div v-if="gameStart" class="relative z-10  flex flex-row w-full h-full ">
+    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <!-- Generate Bingo Table -->
       <div class="w-1/4 flex flex-col justify-center items-center mt-10 ml-16">
         <table
@@ -598,7 +589,11 @@ const resetGame = () => {
                 v-for="col in 5"
                 :key="col"
                 class="border border-black"
-                :class="isHighlighted(bingoTable[col - 1][row - 1] ) ? 'highlighted-cell' :  ''  "
+                :class="
+                  isHighlighted(bingoTable[col - 1][row - 1])
+                    ? 'highlighted-cell'
+                    : ''
+                "
               >
                 {{ bingoTable[col - 1][row - 1] }}
               </td>
@@ -614,7 +609,7 @@ const resetGame = () => {
             <!-- this hidden checkbox controls the state -->
             <input type="checkbox" />
 
-            <audio controls ref="winSoundEffect" class="hidden" >
+            <audio controls ref="winSoundEffect" class="hidden">
               <source src="/audio/winsound.mp3" type="audio/mp3" />
             </audio>
 
@@ -661,7 +656,9 @@ const resetGame = () => {
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
-            <li :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }">
+            <li
+              :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }"
+            >
               {{ drawnNumbers.length }} Balls Left!
             </li>
           </ul>
@@ -777,7 +774,8 @@ const resetGame = () => {
             </thead>
             <tbody>
               <tr v-for="i in 5" :key="i">
-                <td class="text-4xl"
+                <td
+                  class="text-4xl"
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
@@ -815,8 +813,6 @@ const resetGame = () => {
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-
-         
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -853,7 +849,7 @@ const resetGame = () => {
             v-show="showAlertLose"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-            <audio controls ref="loseSoundEffect" class="hidden" >
+            <audio controls ref="loseSoundEffect" class="hidden">
               <source src="/audio/losesound.mp3" type="audio/mp3" />
             </audio>
 
