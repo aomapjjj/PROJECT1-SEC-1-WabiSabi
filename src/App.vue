@@ -1,23 +1,25 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import bgSound from './assets/audio/bg-sound.mp3'
-import clickSound from './assets/audio/click-sound.mp3'
+import { ref, onMounted, computed, watch } from "vue"
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const usedNumber = ref([])
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const showAudio = ref(true)
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
-const showHiddenNumbers = ref(false)
-const countdown = ref(1)
+const countdown = ref(4)
 const alertCountdown = ref(false)
 const showCard1 = ref(false)
 const showCard2 = ref(false)
+const showWhileRandom = ref(false)
+const numberWhileRandom = ref()
+
+// 1-75 bingo table
+const allNumbers = ref(Array.from(Array(76).keys()).splice(1))
 const bingoTable = ref([[], [], [], [], []])
+const highlightedNumbers = ref([])
 
 let autoRandomInterval = null
 
@@ -34,27 +36,38 @@ const randomNumber = () => {
   let randomIndex = Math.floor(Math.random() * numbers.value.length)
   let number = numbers.value.splice(randomIndex, 1)[0]
   usedNumber.value.push(number)
-  console.log('numbers.value', numbers.value)
+  numberWhileRandom.value = number
 
   // ตรวจสอบเงื่อนไขแพ้
   if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
     clearInterval(autoRandomInterval)
-    showAlert.value = true
+    showAlertLose.value = true
+    loseSoundPlay()
   }
-
 
   if (numbers.value.length === 0) {
-    randomBtnText.value = 'Out Of Number!'
+    randomBtnText.value = "Out Of Number!"
     clearInterval(autoRandomInterval)
-    showAlert.value = true
+    showAlertLose.value = true
+    loseSoundPlay()
   }
+  
   toDisabledwhileRandom.value = true
+}
+
+watch(numberWhileRandom, (newValue) => {
+  if (newValue !== null) {
+    highlightedNumbers.value.push(newValue)
+  }
+})
+
+const isHighlighted = (number) => {
+  return highlightedNumbers.value.includes(number)
 }
 
 // Generate Bingo Table - ลูป 5 ครั้งตาม col B,I,N,G,O แต่ละรอบการวน จะดึงตัวเลข 15 ตัวแรกจาก numbers
 // splice ช่วยลบเลขถัดไป เช่น 1-15 แล้วไป 16-30 อะ แล้วมันก็ช่วย sort เลขด้วย
-
-const randomNumsinBorad = [...numbers.value]
+const randomNumsinBorad = [...allNumbers.value]
 
 const generateBingoTable = () => {
   for (let i = 0; i < 5; i++) {
@@ -104,34 +117,44 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const bgmusic = new Audio(bgSound)
-const toggleSound = new Audio(clickSound)
+const musicPlayer = ref("")
+const playingMusic = ref(false)
 
-const playMusic = () => {
-  bgmusic.play()
-  showAudio.value = !showAudio.value
+const onOffMusic = () => {
+  playingMusic.value = !playingMusic.value
+  if (playingMusic.value) musicPlayer.value.play()
+  else musicPlayer.value.pause()
+  console.log(playingMusic.value)
 }
 
-const stopMusic = () => {
-  bgmusic.pause()
-  showAudio.value = !showAudio.value
-}
+const clicksound = ref("")
 
 const clickMusic = () => {
-  toggleSound.play()
+  clicksound.value.play()
+}
+
+const loseSoundEffect = ref("")
+
+const loseSoundPlay = () => {
+  loseSoundEffect.value.play()
+}
+
+const winSoundEffect = ref("")
+
+const winSoundPlay = () => {
+  winSoundEffect.value.play()
 }
 
 const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
 })
 
-const hiddenNumbers = computed(() => {
-  return usedNumber.value.slice(0)
-})
+console.log("visibleNumbers" + usedNumber.value)
 
 //console.log(visibleNumbers)
 
 const checkLineWin = () => {
+
   // Check rows
   for (let row = 0; row < 5; row++) {
     // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
@@ -144,6 +167,7 @@ const checkLineWin = () => {
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
+        
         // console.log(
         //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
         // )
@@ -153,6 +177,8 @@ const checkLineWin = () => {
       console.log(`Row ${row} is completely marked.`)
       return true
     }
+
+
   }
 
   // Check columns
@@ -163,6 +189,7 @@ const checkLineWin = () => {
       const index = row * 5 + col
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         allMarked = false
+    
       }
     }
     if (allMarked) return true
@@ -176,6 +203,7 @@ const checkLineWin = () => {
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
+  
     }
   }
   if (allMarked) return true
@@ -187,22 +215,23 @@ const checkLineWin = () => {
     const index = i * 5 + (4 - i)
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
+  
     }
   }
   if (allMarked) return true
-
   return false
 }
 
 const checkBlackoutWin = () => {
+  winSoundPlay()
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
+    case "line":
       return checkLineWin()
-    case 'blackout':
+    case "blackout":
       return checkBlackoutWin()
     default:
       return false
@@ -212,14 +241,14 @@ const hasWon = computed(() => {
 // auto-random-number
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
-
+  randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 1000)
+  }, 2000)
 
   alertCountdown.value = true
   startCountdown()
+  showWhileRandom.value = true
 }
 
 const startCountdown = () => {
@@ -229,28 +258,35 @@ const startCountdown = () => {
       clearInterval(interval)
       alertCountdown.value = false
     }
-  }, 1000)
+  }, 2000)
 }
 
-const showAlert = ref(false)
+const showAlertLose = ref(false)
+const showAlertWin = ref(false)
 
 const handleBingoClick = () => {
   if (hasWon.value) {
-    showAlert.value = true
+    winSoundPlay()
+    showAlertWin.value = true
+
   }
 }
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
-  showAlert.value = false
-  hasWon.value = false // รีเซ็ตสถานะการชนะ
+  showAlertWin.value = false
+  showAlertLose.value = false
+  hasWon.value = false
   gameStart.value = false
   usedNumber.value = []
   selectedNumbers.value = []
   shuffleNumber()
-  randomBtnText.value = 'Start Bingo Game'
+  randomBtnText.value = "Start Bingo Game"
   numbers.value = Array.from(Array(76).keys()).splice(1)
 }
+
+
+
 </script>
 
 <template>
@@ -262,34 +298,184 @@ const resetGame = () => {
       loop
       muted
     >
-      <source src="./assets/video/bgbingo.mp4" type="video/mp4" />
+      <source src="/video/bgbingo.mp4" type="video/mp4" />
     </video>
 
     <!-- Level Selection -->
-    <div class="absolute inset-0 flex flex-col mt-28 ml-4" v-if="!gameStart">
-      <!-- Logo Level -->
-      <!-- <div class="flex items-center">
-        <img class="h-40 w-40" src="../src/assets/img/bingo.png" />
-
-      </div> -->
-
-      <!-- <div class="card bg-base-100 w-96 shadow-xl">
-        <div class="card-body items-center text-center">
-          <h1 class="text-center">SELECT BINGO MODE</h1>
-          <div class="card-actions justify-end">
-            <button class="btn btn-primary" @click="setLevel('line')">Line</button>
-            <button class="btn btn-error"  @click="setLevel('blackout')"> Black Out</button>
-          </div>
-        </div>
-      </div> -->
-
+    <div class="absolute inset-0 flex flex-col mt-32 ml-4" v-if="!gameStart">
       <div class="text-focus-in">
         <div class="flex items-center justify-between">
-          <div class="mt-12">
-            <h1 class="text-7xl m-5">Welcome to your Bingo!</h1>
-            <h1 class="text-7xl m-5">Challenge yourself</h1>
-            <h1 class="text-4xl text-left m-5">Start playing now!</h1>
-            <div class="flex flex-row">
+          <div class="">
+            <div class="text-7xl m-5 flex items-center">
+              <p>
+                Dive into the Fun <br />with
+                <span class="text-red-500 jersey-20-regular">B</span>
+                <span class="text-yellow-500 jersey-20-regular">I</span>
+                <span class="text-green-500 jersey-20-regular">N</span>
+                <span class="text-blue-500 jersey-20-regular">G</span>
+                <span class="text-purple-500 jersey-20-regular">O</span>
+                <span> Game</span>
+              </p>
+              <svg
+                class="mt-20"
+                xmlns="http://www.w3.org/2000/svg"
+                width="64"
+                height="64"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  fill="#45413c"
+                  d="M15.52 44.18a8.48 1.82 0 1 0 16.96 0a8.48 1.82 0 1 0-16.96 0"
+                  opacity=".15"
+                />
+                <path
+                  fill="#ff6242"
+                  d="M25.4 2.5h-2.8c-1.86 0-3.34 1.18-3.23 2.57L21 26.32c.09 1.18 1.4 2.11 3 2.11s2.88-.93 3-2.11l1.63-21.25c.11-1.39-1.37-2.57-3.23-2.57"
+                />
+                <path
+                  fill="#ff866e"
+                  d="M19.56 7.48a3.31 3.31 0 0 1 3-1.6h2.8a3.31 3.31 0 0 1 3 1.6l.19-2.41c.11-1.39-1.37-2.57-3.23-2.57H22.6c-1.86 0-3.34 1.18-3.23 2.57Z"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M25.4 2.5h-2.8c-1.86 0-3.34 1.18-3.23 2.57L21 26.32c.09 1.18 1.4 2.11 3 2.11s2.88-.93 3-2.11l1.63-21.25c.11-1.39-1.37-2.57-3.23-2.57"
+                />
+                <path
+                  fill="#ff6242"
+                  d="M20.35 35.24a3.65 3.65 0 1 0 7.3 0a3.65 3.65 0 1 0-7.3 0"
+                />
+                <path
+                  fill="#ff866e"
+                  d="M24 33.93A3.58 3.58 0 0 1 27.57 36a4 4 0 0 0 .08-.77a3.65 3.65 0 1 0-7.3 0a4 4 0 0 0 .08.77A3.58 3.58 0 0 1 24 33.93"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M20.35 35.24a3.65 3.65 0 1 0 7.3 0a3.65 3.65 0 1 0-7.3 0"
+                />
+              </svg>
+            </div>
+            <div class="flex items-center space-x-4 mt-5 ml-5 px-4 py-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  fill="#ffe500"
+                  d="M4 21.5a20 20 0 1 0 40 0a20 20 0 1 0-40 0"
+                />
+                <path
+                  fill="#ebcb00"
+                  d="M24 1.5a20 20 0 1 0 20 20a20 20 0 0 0-20-20m0 37a18.25 18.25 0 1 1 18.25-18.25A18.25 18.25 0 0 1 24 38.5"
+                />
+                <path
+                  fill="#fff48c"
+                  d="M18 5.5a6 1.5 0 1 0 12 0a6 1.5 0 1 0-12 0"
+                />
+                <path
+                  fill="#45413c"
+                  d="M8 45.5a16 1.5 0 1 0 32 0a16 1.5 0 1 0-32 0"
+                  opacity=".15"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4 21.5a20 20 0 1 0 40 0a20 20 0 1 0-40 0"
+                />
+                <path
+                  fill="#ffaa54"
+                  d="M38.5 26.5c0 .83-1.12 1.5-2.5 1.5s-2.5-.67-2.5-1.5S34.62 25 36 25s2.5.67 2.5 1.5m-29 0c0 .83 1.12 1.5 2.5 1.5s2.5-.67 2.5-1.5S13.38 25 12 25s-2.5.67-2.5 1.5"
+                />
+                <path
+                  fill="#ffb0ca"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.94 29.5a.94.94 0 0 0-.71.33a1 1 0 0 0-.22.76a7.09 7.09 0 0 0 14 0a1 1 0 0 0-.22-.76a.94.94 0 0 0-.71-.33Z"
+                />
+                <path
+                  fill="#ff87af"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M29.57 33.84A11.4 11.4 0 0 0 24 32.53a11.4 11.4 0 0 0-5.57 1.31a7.16 7.16 0 0 0 11.14 0"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10 22.75a1.75 1.75 0 0 1 3.5 0m21 0a1.75 1.75 0 0 1 3.5 0"
+                />
+              </svg>
+              <p class="text-4xl">Choose Your Game Mode</p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  fill="#ffe500"
+                  d="M4 21.5a20 20 0 1 0 40 0a20 20 0 1 0-40 0"
+                />
+                <path
+                  fill="#ebcb00"
+                  d="M24 1.5a20 20 0 1 0 20 20a20 20 0 0 0-20-20m0 37a18.25 18.25 0 1 1 18.25-18.25A18.25 18.25 0 0 1 24 38.5"
+                />
+                <path
+                  fill="#fff48c"
+                  d="M18 5.5a6 1.5 0 1 0 12 0a6 1.5 0 1 0-12 0"
+                />
+                <path
+                  fill="#45413c"
+                  d="M8 45.5a16 1.5 0 1 0 32 0a16 1.5 0 1 0-32 0"
+                  opacity=".15"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4 21.5a20 20 0 1 0 40 0a20 20 0 1 0-40 0"
+                />
+                <path
+                  fill="#ffaa54"
+                  d="M38.5 26.5c0 .83-1.12 1.5-2.5 1.5s-2.5-.67-2.5-1.5S34.62 25 36 25s2.5.67 2.5 1.5m-29 0c0 .83 1.12 1.5 2.5 1.5s2.5-.67 2.5-1.5S13.38 25 12 25s-2.5.67-2.5 1.5"
+                />
+                <path
+                  fill="#ffb0ca"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.94 29.5a.94.94 0 0 0-.71.33a1 1 0 0 0-.22.76a7.09 7.09 0 0 0 14 0a1 1 0 0 0-.22-.76a.94.94 0 0 0-.71-.33Z"
+                />
+                <path
+                  fill="#ff87af"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M29.57 33.84A11.4 11.4 0 0 0 24 32.53a11.4 11.4 0 0 0-5.57 1.31a7.16 7.16 0 0 0 11.14 0"
+                />
+                <path
+                  fill="none"
+                  stroke="#45413c"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10 22.75a1.75 1.75 0 0 1 3.5 0m21 0a1.75 1.75 0 0 1 3.5 0"
+                />
+              </svg>
+            </div>
+            <div class="flex flex-row px-10 py-3">
               <div ontouchstart="">
                 <div
                   class="button"
@@ -312,33 +498,48 @@ const resetGame = () => {
           </div>
           <!-- v-if="showCard1" -->
           <div class="flex justify-end" v-if="showCard1">
-            <div class="card bg-base-100 w-96 shadow-xl mr-24">
-              <div class="card-body">
-                <h2 class="card-title text-2xl">Line Win Pattern</h2>
+            <div
+              class="card bg-white w-96 shadow-xl mr-24 rounded-lg overflow-hidden border-4 border-yellow-400"
+            >
+              <div
+                class="card-body text-center h-48 flex flex-col justify-center items-center"
+              >
+                <h2 class="card-title text-3xl font-bold text-yellow-400 mb-6">
+                  Line Win Pattern
+                </h2>
+                <p class="text-lg text-green-700 font-semibold mt-2">
+                  Complete a single row<br />and claim your win!
+                </p>
               </div>
               <figure>
-                <img src="./assets/img/bingoWinLine1.png" alt="Shoes" />
-              </figure>
-              <figure>
                 <img
-                  class="w-80"
-                  src="./assets/img/bingoWinLine2.png"
-                  alt="Shoes"
+                  src="/img/bingoWinLine.png"
+                  alt="Line"
+                  class="w-56 h-56 object-contain"
                 />
               </figure>
             </div>
           </div>
 
           <div class="flex justify-end" v-if="showCard2">
-            <div class="card bg-base-100 w-96 shadow-xl mr-24">
-              <div class="card-body">
-                <h2 class="card-title text-2xl">Blackout Win Pattern</h2>
+            <div
+              class="card bg-white w-96 shadow-xl mr-24 rounded-lg overflow-hidden border-4 border-blue-400"
+            >
+              <div
+                class="card-body text-center h-48 flex flex-col justify-center items-center"
+              >
+                <h2 class="card-title text-3xl font-bold text-blue-400 mb-6">
+                  Blackout Win Pattern
+                </h2>
+                <p class="text-lg text-green-700 font-semibold mt-2">
+                  Fill the entire card to<br />achieve ultimate victory!
+                </p>
               </div>
               <figure>
                 <img
-                  class="w-96"
-                  src="./assets/img/bingoWinBlackout.png"
-                  alt="Shoes"
+                  class="w-56 h-56 object-contain"
+                  src="/img/bingoWinBlackout.png"
+                  alt="Blackout"
                 />
               </figure>
             </div>
@@ -350,67 +551,94 @@ const resetGame = () => {
     <!-- game content -->
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
       <!-- Generate Bingo Table -->
-
-      <div class="w-1/2 flex flex-col justify-center items-center">
-        <div class="w-4/5">
-          <table
-            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
-          >
-            <thead>
-              <tr>
-                <th class="bg-red-500 text-white text-3xl">B</th>
-                <th class="bg-yellow-500 text-white text-3xl">I</th>
-                <th class="bg-green-500 text-white text-3xl">N</th>
-                <th class="bg-blue-500 text-white text-3xl">G</th>
-                <th class="bg-purple-500 text-white text-3xl">O</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in 15" :key="row">
-                <td v-for="col in 5" :key="col">
-                  {{ bingoTable[col - 1][row - 1] }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="w-1/4 flex flex-col justify-center items-center mt-10 ml-16">
+        <table
+          class="table-sm bg-white m-1 rounded-lg table-zebra border border-black"
+        >
+          <thead>
+            <tr>
+              <th class="bg-red-500 text-white text-lg border border-black">
+                B
+              </th>
+              <th class="bg-yellow-500 text-white text-lg border border-black">
+                I
+              </th>
+              <th class="bg-green-500 text-white text-lg border border-black">
+                N
+              </th>
+              <th class="bg-blue-500 text-white text-lg border border-black">
+                G
+              </th>
+              <th class="bg-purple-500 text-white text-lg border border-black">
+                O
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in 15" :key="row" class="border border-black">
+              <td
+                v-for="col in 5"
+                :key="col"
+                class="border border-black"
+                :class="{
+                  'highlighted-cell': isHighlighted(
+                    bingoTable[col - 1][row - 1]
+                  )
+                }"
+              >
+                {{ bingoTable[col - 1][row - 1] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="w-1/2 flex flex-col justify-center items-center">
         <!-- Audio Controls -->
         <div class="absolute top-6 right-6 flex items-center">
-          <button @click="playMusic" v-show="showAudio">
+          <label class="swap">
+            <!-- this hidden checkbox controls the state -->
+            <input type="checkbox" />
+
+            <audio controls ref="musicPlayer" class="hidden" loop>
+              <source src="/audio/bgmusic1.mp3" type="audio/mp3" />
+            </audio>
+
+            <audio controls ref="clicksound" class="hidden">
+              <source src="/audio/click-sound1.wav" type="audio/wav" />
+            </audio>
+
+            <!-- volume on icon -->
             <svg
+              @click="onOffMusic"
+              class="swap-on fill-current"
               xmlns="http://www.w3.org/2000/svg"
-              width="36"
-              height="32"
-              viewBox="0 0 640 512"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
             >
               <path
-                d="M633.82 458.1l-69-53.33C592.42 360.8 608 309.68 608 256c0-95.33-47.73-183.58-127.65-236.03-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 42.78-11.96 83.59-33.22 119.06l-38.12-29.46C503.49 318.68 512 288.06 512 256c0-63.09-32.06-122.09-85.77-156.16-11.19-7.09-26.03-3.8-33.12 7.41-7.09 11.2-3.78 26.03 7.41 33.13C440.27 165.59 464 209.44 464 256c0 21.21-5.03 41.57-14.2 59.88l-39.56-30.58c3.38-9.35 5.76-19.07 5.76-29.3 0-31.88-17.53-61.33-45.77-76.88-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61 11.76 6.46 19.12 18.18 20.4 31.06L288 190.82V88.02c0-21.46-25.96-31.98-40.97-16.97l-49.71 49.7L45.47 3.37C38.49-2.05 28.43-.8 23.01 6.18L3.37 31.45C-2.05 38.42-.8 48.47 6.18 53.9l588.36 454.73c6.98 5.43 17.03 4.17 22.46-2.81l19.64-25.27c5.41-6.97 4.16-17.02-2.82-22.45zM32 184v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V352.6L43.76 163.84C36.86 168.05 32 175.32 32 184z"
-                fill="#000000"
+                d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
               />
             </svg>
-          </button>
-          <button @click="stopMusic" v-show="!showAudio">
+
+            <!-- volume off icon -->
             <svg
+              @click="onOffMusic"
+              class="swap-off fill-current"
               xmlns="http://www.w3.org/2000/svg"
-              width="36"
-              height="32"
-              viewBox="0 0 576 512"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
             >
               <path
-                fill="#000000"
-                d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97m233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95c-7.34 11.17-4.22 26.18 6.95 33.51c66.27 43.49 105.82 116.6 105.82 195.58S488.06 408.1 421.79 451.59c-11.17 7.32-14.29 22.34-6.95 33.5c7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97M480 256c0-63.53-32.06-121.94-85.77-156.24c-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36c6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256m-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45c-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81c-11.61 6.41-15.84 21-9.45 32.61c6.43 11.66 21.05 15.8 32.61 9.45c28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86"
+                d="M3,9H7L12,4V20L7,15H3V9M16.59,12L14,9.41L15.41,8L18,10.59L20.59,8L22,9.41L19.41,12L22,14.59L20.59,16L18,13.41L15.41,16L14,14.59L16.59,12Z"
               />
             </svg>
-          </button>
+          </label>
         </div>
 
         <!-- Header -->
-        <div class="flex flex-row justify-center mt-6">
-          <img class="h-48 w-48" src="../src/assets/img/bingo.png" />
-        </div>
         <div class="breadcrumbs text-xl border px-5 border-black rounded-md">
           <ul>
             <li class="font-normal">MODE</li>
@@ -432,6 +660,17 @@ const resetGame = () => {
         </div>
 
         <div class="flex flex-row justify-center m-8">
+          <button class="btn mr-3 btn-error">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+            >
+              <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
+            </svg>
+          </button>
+
           <button
             class="btn mr-3"
             :disabled="
@@ -441,6 +680,7 @@ const resetGame = () => {
           >
             {{ randomBtnText }}
           </button>
+
           <button
             class="btn btn-warning"
             @click="shuffleNumber"
@@ -471,10 +711,10 @@ const resetGame = () => {
           </button>
         </div>
 
-        <div class="flex flex-col items-center mt-8">
+        <div class="flex flex-col items-center mt-8" v-show="showWhileRandom">
           <!-- Display the first 5 numbers -->
           <div
-            class="relative p-6 border-4 border-blue-500 rounded-md bg-white shadow-xl flex items-center justify-center w-auto min-w-max"
+            class="relative p-6 border-4 border-blue-500 rounded-full bg-white shadow-xl flex items-center justify-center w-[450px] h-[100px]"
           >
             <div class="flex flex-row gap-4">
               <div
@@ -483,36 +723,6 @@ const resetGame = () => {
                 class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
               >
                 <p class="text-2xl font-bold text-white">
-                  {{ num }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Hidden nums -->
-          <div @click="showHiddenNumbers = !showHiddenNumbers">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 512 512"
-            >
-              <path
-                d="M98.9 184.7l1.8 2.1 136 156.5c4.6 5.3 11.5 8.6 19.2 8.6 7.7 0 14.6-3.4 19.2-8.6L411 187.1l2.3-2.6c1.7-2.5 2.7-5.5 2.7-8.7 0-8.7-7.4-15.8-16.6-15.8H112.6c-9.2 0-16.6 7.1-16.6 15.8 0 3.3 1.1 6.4 2.9 8.9z"
-                fill="#d9d9d9"
-              />
-            </svg>
-          </div>
-
-          <!-- Display hidden numbers -->
-          <div v-if="showHiddenNumbers" class="mt-4 p-4 bg-gray-100 rounded-lg">
-            <div class="flex flex-wrap gap-2 justify-center">
-              <div
-                v-for="(num, index) in hiddenNumbers.toReversed()"
-                :key="index"
-                class="flex w-12 h-12 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-green-400 to-blue-50"
-              >
-                <p class="text-xl font-bold text-black">
                   {{ num }}
                 </p>
               </div>
@@ -532,7 +742,7 @@ const resetGame = () => {
       </div>
 
       <!-- Bingo Board -->
-      <div class="w-1/2 flex justify-center items-center mt-24">
+      <div class="w-1/2 flex justify-center items-center">
         <div class="w-4/5">
           <table
             class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
@@ -574,19 +784,23 @@ const resetGame = () => {
           <!-- Add Bingo! button below the Bingo board -->
           <div class="w-full flex justify-center items-center m-2">
             <button
-              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl"
+              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl border-2 border-white -mt-12"
               :disabled="!hasWon"
               @click="handleBingoClick"
             >
-              Bingo!
+              BINGO
             </button>
           </div>
 
           <!-- Alert Win -->
           <div
-            v-show="showAlert"
+            v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
+
+          <audio controls ref="winSoundEffect" class="hidden" >
+              <source src="/audio/winsound.mp3" type="audio/mp3" />
+            </audio>
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -598,7 +812,7 @@ const resetGame = () => {
                 loop
                 muted
               >
-                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                <source src="/video/heart.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
@@ -620,9 +834,13 @@ const resetGame = () => {
 
           <!-- Alert lose -->
           <div
-            v-show="showAlert"
+            v-show="showAlertLose"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
+            <audio controls ref="loseSoundEffect" class="hidden" >
+              <source src="/audio/losesound.mp3" type="audio/mp3" />
+            </audio>
+
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -634,7 +852,7 @@ const resetGame = () => {
                 loop
                 muted
               >
-                <source src="/src/assets/video/heart.mp4" type="video/mp4" />
+                <source src="/video/heart.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
@@ -660,6 +878,15 @@ const resetGame = () => {
 </template>
 
 <style scoped>
+.highlighted-cell {
+  color: red;
+  background-color: #fdd;
+}
+
+th {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .bounce-in-top {
   -webkit-animation: bounce-in-top 1.1s both;
   animation: bounce-in-top 1.1s both;
@@ -771,7 +998,7 @@ const resetGame = () => {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -793,7 +1020,7 @@ const resetGame = () => {
   font-size: 36px;
   text-align: center;
   text-decoration: none;
-  background-color: #e74c3c; /* สีแดงหลัก */
+  background-color: #e74c3c;
   display: block;
   position: relative;
   padding: 20px 40px;
@@ -814,14 +1041,13 @@ const resetGame = () => {
 .button a:active {
   top: 10px;
   background-color: #c0392b;
-
   -webkit-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
   -moz-box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
   box-shadow: inset 0 1px 0 #ffccc7, inset 0 -3px 0 #8b0000;
 }
 
 .button:after {
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
   padding: 4px;
