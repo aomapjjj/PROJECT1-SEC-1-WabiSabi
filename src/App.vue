@@ -730,6 +730,7 @@ const resumeGame = () => {
               class="btn mr-3 btn-error mt-2"
               @click="pauseGame"
               v-if="gamePaused === false"
+              :disabled="!toDisabledwhileRandom"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
