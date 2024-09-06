@@ -245,12 +245,13 @@ const hasWon = computed(() => {
 })
 
 const isResuming = ref(false)
+
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
   randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 1000)
+  },4000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -271,18 +272,25 @@ const startCountdown = () => {
       clearInterval(interval)
       alertCountdown.value = false
     }
-  }, 100)
+  }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 
+
+
 const handleBingoClick = () => {
+
   if (hasWon.value) {
+    pauseGame()
     winSoundPlay()
     showAlertWin.value = true
   }
 }
+
+const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
+
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
@@ -306,9 +314,12 @@ const resetGame = () => {
   numberWhileRandom.value = null
   clearInterval(autoRandomInterval)
   autoRandomInterval = null
+  gamePaused.value = false
+  console.log(gamePaused.value)
 }
 
-const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
+
+
 
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
@@ -330,6 +341,8 @@ const resumeGame = () => {
     
   }
 }
+
+
 </script>
 
 <template>
@@ -714,9 +727,10 @@ const resumeGame = () => {
           <div>
             <!-- Pause  -->
             <button
-              class="btn mr-3 btn-error"
+              class="btn mr-3 btn-error mt-2"
               @click="pauseGame"
-              :disabled="gamePaused"
+              v-if="gamePaused === false"
+              :disabled="!toDisabledwhileRandom"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -731,9 +745,9 @@ const resumeGame = () => {
 
             <!-- Resume  -->
             <button
-              class="btn mr-3 btn-success"
+              class="btn mr-3 btn-success mt-2"
               @click="resumeGame"
-              :disabled="!gamePaused"
+              v-if="gamePaused === true"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -748,7 +762,7 @@ const resumeGame = () => {
           </div>
 
           <button
-            class="btn mr-3"
+            class="btn btn-lg btn-warning mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -758,7 +772,7 @@ const resumeGame = () => {
           </button>
 
           <button
-            class="btn btn-warning"
+            class="btn btn-info mt-2"
             @click="shuffleNumber"
             :disabled="toDisabledwhileRandom"
           >
