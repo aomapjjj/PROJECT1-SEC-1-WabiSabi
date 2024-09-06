@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue"
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
+const drawnNumbers = ref([])
 const usedNumber = ref([])
 const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
@@ -32,32 +33,39 @@ onMounted(() => {
   shuffleNumber()
 })
 
-const randomNumber = () => {
-  let randomIndex = Math.floor(Math.random() * numbers.value.length)
-  let number = numbers.value.splice(randomIndex, 1)[0]
-  usedNumber.value.push(number)
-  numberWhileRandom.value = number
-
-  // ตรวจสอบเงื่อนไขแพ้
-  if (usedNumber.value.length === 35 && selectedNumbers.value.length === 0) {
-    clearInterval(autoRandomInterval)
-    showAlertLose.value = true
-    loseSoundPlay()
+// Randomly select 60 unique numbers
+const select60Numbers = () => {
+  drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
+  let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
+  while (drawnNumbers.value.length < 60) {
+    // เราต้องการ 60 ตัวเลข ไม่ใช่ 35
+    let randomIndex = Math.floor(Math.random() * availableNumbers.length)
+    let number = availableNumbers.splice(randomIndex, 1)[0]
+    drawnNumbers.value.push(number)
   }
-
-  if (numbers.value.length === 0) {
-    randomBtnText.value = "Out Of Number!"
-    clearInterval(autoRandomInterval)
-    showAlertLose.value = true
-    loseSoundPlay()
-  }
-  
-  toDisabledwhileRandom.value = true
 }
 
+select60Numbers()
+
+const randomNumber = () => {
+  // ถ้าไม่มีตัวเลขเหลือ ให้แสดงข้อความและจบการทำงาน
+  if (drawnNumbers.value.length < 1) {
+    return // จบการทำงานทันทีเมื่อไม่มีตัวเลขเหลือ
+  }
+
+  // สุ่ม index ของตัวเลขจาก drawnNumbers
+  let randomIndex = Math.floor(Math.random() * drawnNumbers.value.length)
+  let number = drawnNumbers.value.splice(randomIndex, 1)[0] // ลบตัวเลขที่สุ่มออกจาก array
+  usedNumber.value.push(number) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ใช้แล้ว
+  numberWhileRandom.value = number // ตั้งค่าตัวเลขปัจจุบันเพื่อแสดง
+
+  toDisabledwhileRandom.value = true // ปิดการกดปุ่มขณะสุ่มตัวเลข
+}
+
+// ฟังก์ชัน watch ตัวเลขขณะสุ่ม
 watch(numberWhileRandom, (newValue) => {
   if (newValue !== null) {
-    highlightedNumbers.value.push(newValue)
+    highlightedNumbers.value.push(newValue) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ถูกไฮไลต์
   }
 })
 
@@ -77,7 +85,7 @@ const generateBingoTable = () => {
 }
 console.log(generateBingoTable())
 
-let numberOnBoard = Array.apply(null, { length: 51 }).map(Number.call, Number)
+let numberOnBoard = Array.apply(null, { length: 76 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 const shuffleNumber = () => {
@@ -89,7 +97,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -154,7 +162,6 @@ console.log("visibleNumbers" + usedNumber.value)
 //console.log(visibleNumbers)
 
 const checkLineWin = () => {
-
   // Check rows
   for (let row = 0; row < 5; row++) {
     // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
@@ -167,7 +174,7 @@ const checkLineWin = () => {
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
-        
+
         // console.log(
         //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
         // )
@@ -177,8 +184,6 @@ const checkLineWin = () => {
       console.log(`Row ${row} is completely marked.`)
       return true
     }
-
-
   }
 
   // Check columns
@@ -189,7 +194,6 @@ const checkLineWin = () => {
       const index = row * 5 + col
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         allMarked = false
-    
       }
     }
     if (allMarked) return true
@@ -203,7 +207,6 @@ const checkLineWin = () => {
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -215,7 +218,6 @@ const checkLineWin = () => {
     const index = i * 5 + (4 - i)
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       allMarked = false
-  
     }
   }
   if (allMarked) return true
@@ -223,7 +225,6 @@ const checkLineWin = () => {
 }
 
 const checkBlackoutWin = () => {
-  winSoundPlay()
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
@@ -238,16 +239,28 @@ const hasWon = computed(() => {
   }
 })
 
-// auto-random-number
+const isResuming = ref(false)
+const endGameCountDown = ref(false)
+
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
   randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
+    if (drawnNumbers.value.length == 1) {
+      endGameCountDown.value = true
+      endCountdown()
+    }
     randomNumber()
-  }, 2000)
+  }, 4000)
 
-  alertCountdown.value = true
-  startCountdown()
+  // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
+  if (!isResuming.value) {
+    alertCountdown.value = true
+    startCountdown()
+  } else {
+    isResuming.value = false // Reset ค่าหลังจาก resume แล้ว
+  }
+
   showWhileRandom.value = true
 }
 
@@ -256,21 +269,39 @@ const startCountdown = () => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(interval)
+      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้ ปรับเลย
       alertCountdown.value = false
     }
-  }, 2000)
+  }, 1000)
+}
+
+const endCountdown = () => {
+  let interval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(interval)
+      endGameCountDown.value = false
+      randomBtnText.value = "Out Of Number!"
+      clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
+      showAlertLose.value = true // แสดงข้อความว่าแพ้
+      loseSoundPlay() // เล่นเสียงแพ้
+    }
+  }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 
+
 const handleBingoClick = () => {
   if (hasWon.value) {
+    pauseGame()
     winSoundPlay()
     showAlertWin.value = true
-
   }
 }
+
+const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
@@ -280,17 +311,57 @@ const resetGame = () => {
   gameStart.value = false
   usedNumber.value = []
   selectedNumbers.value = []
-  shuffleNumber()
+  highlightedNumbers.value = []
+  drawnNumbers.value = []
+  shuffleNumber() // รีเซ็ตตัวเลข
+  select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
   randomBtnText.value = "Start Bingo Game"
-  numbers.value = Array.from(Array(76).keys()).splice(1)
+  toDisabledwhileRandom.value = false
+  countPauseGame.value = 0
+  countdown.value = 4
+  alertCountdown.value = false
+  showCard1.value = false
+  showCard2.value = false
+  showWhileRandom.value = false
+  numberWhileRandom.value = null
+  clearInterval(autoRandomInterval)
+  autoRandomInterval = null
+  gamePaused.value = false
+  console.log(gamePaused.value)
 }
 
 
+const countPauseGame = ref(0)
 
+
+// ฟังก์ชัน pause เกม
+const pauseGame = () => {
+  if (autoRandomInterval) {
+    clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
+    autoRandomInterval = null
+    gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
+    randomBtnText.value = "Game Paused"
+    countPauseGame.value++
+    console.log(countPauseGame.value)
+  }
+}
+
+// ฟังก์ชัน resume เกม
+const resumeGame = () => {
+  if (gamePaused.value) {
+    isResuming.value = true
+    startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
+    gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
+
+    randomBtnText.value = "Randomizing..."
+
+  }
+}
 </script>
 
 <template>
   <div class="relative w-full h-full">
+    
     <!-- Video Background -->
     <video
       class="absolute top-0 left-0 w-full object-cover h-screen"
@@ -549,11 +620,12 @@ const resetGame = () => {
     </div>
 
     <!-- game content -->
-    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
+    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-screen"
+    style="background-image: url('/img/bingopic1.jpg'); background-size: cover; background-position: center;" >
       <!-- Generate Bingo Table -->
-      <div class="w-1/4 flex flex-col justify-center items-center mt-10 ml-16">
+      <div class="w-2/5 flex flex-col justify-center items-center mt-10 ml-16">
         <table
-          class="table-sm bg-white m-1 rounded-lg table-zebra border border-black"
+          class="table-md bg-white m-1 rounded-lg table-zebra border border-black"
         >
           <thead>
             <tr>
@@ -580,11 +652,11 @@ const resetGame = () => {
                 v-for="col in 5"
                 :key="col"
                 class="border border-black"
-                :class="{
-                  'highlighted-cell': isHighlighted(
-                    bingoTable[col - 1][row - 1]
-                  )
-                }"
+                :class="
+                  isHighlighted(bingoTable[col - 1][row - 1])
+                    ? 'highlighted-cell'
+                    : ''
+                "
               >
                 {{ bingoTable[col - 1][row - 1] }}
               </td>
@@ -600,6 +672,10 @@ const resetGame = () => {
             <!-- this hidden checkbox controls the state -->
             <input type="checkbox" />
 
+            <audio controls ref="winSoundEffect" class="hidden">
+              <source src="/audio/winsound.mp3" type="audio/mp3" />
+            </audio>
+
             <audio controls ref="musicPlayer" class="hidden" loop>
               <source src="/audio/bgmusic1.mp3" type="audio/mp3" />
             </audio>
@@ -611,7 +687,7 @@ const resetGame = () => {
             <!-- volume on icon -->
             <svg
               @click="onOffMusic"
-              class="swap-on fill-current"
+              class="swap-on fill-current text-white"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -625,7 +701,7 @@ const resetGame = () => {
             <!-- volume off icon -->
             <svg
               @click="onOffMusic"
-              class="swap-off fill-current"
+              class="swap-off fill-current text-red-100"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -638,13 +714,24 @@ const resetGame = () => {
           </label>
         </div>
 
+        <div class="w-40 mb-5" v-if="endGameCountDown">
+          <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div
+              class="bg-red-600 h-2.5 rounded-full"
+              :style="{ width: countdown * 10 + '%' }"
+            ></div>
+          </div>
+        </div>
+
         <!-- Header -->
-        <div class="breadcrumbs text-xl border px-5 border-black rounded-md">
+        <div class="breadcrumbs text-xl bg-white border px-5 rounded-md">
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
-            <li :style="{ color: numbers.length === 50 ? 'black' : 'red' }">
-              {{ numbers.length }} Balls Left!
+            <li
+              :style="{ color: drawnNumbers.length === 60 ? 'black' : 'red' }"
+            >
+              {{ drawnNumbers.length }} Balls Left!
             </li>
           </ul>
         </div>
@@ -659,20 +746,51 @@ const resetGame = () => {
           </div>
         </div>
 
+        <!-- header button -->
         <div class="flex flex-row justify-center m-8">
-          <button class="btn mr-3 btn-error">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
+          <!-- pause btn -->
+          <div>
+            <!-- Pause  -->
+            <button
+              class="btn mr-3 btn-error mt-2"
+              @click="pauseGame"
+              v-if="gamePaused === false"
+              :disabled="
+                !toDisabledwhileRandom ||
+                countPauseGame === 3 ||
+                drawnNumbers.length < 21
+              "
             >
-              <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
+              </svg>
+            </button>
 
+            <!-- Resume  -->
+            <button
+              class="btn mr-3 btn-success mt-2"
+              @click="resumeGame"
+              v-if="gamePaused === true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <path fill="#ffffff" d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+          </div>
+
+        
           <button
-            class="btn mr-3"
+            class="btn btn-lg btn-fantasy mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -682,7 +800,7 @@ const resetGame = () => {
           </button>
 
           <button
-            class="btn btn-warning"
+            class="btn btn-info mt-2"
             @click="shuffleNumber"
             :disabled="toDisabledwhileRandom"
           >
@@ -745,7 +863,7 @@ const resetGame = () => {
       <div class="w-1/2 flex justify-center items-center">
         <div class="w-4/5">
           <table
-            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
+            class="jersey-20-regular table-md bg-white m-9 rounded-md table-zebra"
           >
             <!-- head -->
             <thead>
@@ -760,6 +878,7 @@ const resetGame = () => {
             <tbody>
               <tr v-for="i in 5" :key="i">
                 <td
+                  class="text-4xl"
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
@@ -772,7 +891,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -791,16 +910,11 @@ const resetGame = () => {
               BINGO
             </button>
           </div>
-
           <!-- Alert Win -->
-          <div
+      <div
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-
-          <audio controls ref="winSoundEffect" class="hidden" >
-              <source src="/audio/winsound.mp3" type="audio/mp3" />
-            </audio>
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -837,7 +951,7 @@ const resetGame = () => {
             v-show="showAlertLose"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-            <audio controls ref="loseSoundEffect" class="hidden" >
+            <audio controls ref="loseSoundEffect" class="hidden">
               <source src="/audio/losesound.mp3" type="audio/mp3" />
             </audio>
 
@@ -871,8 +985,11 @@ const resetGame = () => {
               </div>
             </div>
           </div>
+          
+          
         </div>
       </div>
+      
     </div>
   </div>
 </template>
@@ -885,6 +1002,49 @@ const resetGame = () => {
 
 th {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-fantasy {
+  background: linear-gradient(135deg, #e74c3c, #f1c40f, #3498db);
+  color: white;
+  font-size: 1.5rem;
+  padding: 15px 30px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-fantasy:hover {
+  background: linear-gradient(135deg, #2ecc71, #e74c3c, #9b59b6);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+
+.btn-fantasy:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.btn-fantasy:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-fantasy:disabled {
+  background: #ccc;
+  color: #777;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 .bounce-in-top {
