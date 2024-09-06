@@ -252,6 +252,7 @@ const startAutoRandomNumber = () => {
     }
     randomNumber()
   }, 4000)
+
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
     alertCountdown.value = true
@@ -274,7 +275,6 @@ const startCountdown = () => {
   }, 1000)
 }
 
-
 const endCountdown = () => {
   let interval = setInterval(() => {
     countdown.value--
@@ -291,6 +291,7 @@ const endCountdown = () => {
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
+
 
 const handleBingoClick = () => {
   if (hasWon.value) {
@@ -329,7 +330,9 @@ const resetGame = () => {
   console.log(gamePaused.value)
 }
 
+
 const countPauseGame = ref(0)
+
 
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
@@ -349,13 +352,16 @@ const resumeGame = () => {
     isResuming.value = true
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
+
     randomBtnText.value = "Randomizing..."
+
   }
 }
 </script>
 
 <template>
   <div class="relative w-full h-full">
+    
     <!-- Video Background -->
     <video
       class="absolute top-0 left-0 w-full object-cover h-screen"
@@ -614,11 +620,12 @@ const resumeGame = () => {
     </div>
 
     <!-- game content -->
-    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-full">
+    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-screen"
+    style="background-image: url('/img/bingopic1.jpg'); background-size: cover; background-position: center;" >
       <!-- Generate Bingo Table -->
-      <div class="w-1/4 flex flex-col justify-center items-center mt-10 ml-16">
+      <div class="w-2/5 flex flex-col justify-center items-center mt-10 ml-16">
         <table
-          class="table-sm bg-white m-1 rounded-lg table-zebra border border-black"
+          class="table-md bg-white m-1 rounded-lg table-zebra border border-black"
         >
           <thead>
             <tr>
@@ -680,7 +687,7 @@ const resumeGame = () => {
             <!-- volume on icon -->
             <svg
               @click="onOffMusic"
-              class="swap-on fill-current"
+              class="swap-on fill-current text-white"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -694,7 +701,7 @@ const resumeGame = () => {
             <!-- volume off icon -->
             <svg
               @click="onOffMusic"
-              class="swap-off fill-current"
+              class="swap-off fill-current text-red-100"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -717,7 +724,7 @@ const resumeGame = () => {
         </div>
 
         <!-- Header -->
-        <div class="breadcrumbs text-xl border px-5 border-black rounded-md">
+        <div class="breadcrumbs text-xl bg-white border px-5 rounded-md">
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
@@ -776,14 +783,14 @@ const resumeGame = () => {
                 height="32"
                 viewBox="0 0 24 24"
               >
-                <!-- ไอคอน resume (play icon) -->
                 <path fill="#ffffff" d="M8 5v14l11-7z" />
               </svg>
             </button>
           </div>
 
+        
           <button
-            class="btn btn-lg btn-warning mr-3"
+            class="btn btn-lg btn-fantasy mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -856,7 +863,7 @@ const resumeGame = () => {
       <div class="w-1/2 flex justify-center items-center">
         <div class="w-4/5">
           <table
-            class="jersey-20-regular table-lg bg-white m-9 rounded-lg table-zebra"
+            class="jersey-20-regular table-md bg-white m-9 rounded-md table-zebra"
           >
             <!-- head -->
             <thead>
@@ -903,9 +910,8 @@ const resumeGame = () => {
               BINGO
             </button>
           </div>
-
           <!-- Alert Win -->
-          <div
+      <div
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
@@ -979,8 +985,11 @@ const resumeGame = () => {
               </div>
             </div>
           </div>
+          
+          
         </div>
       </div>
+      
     </div>
   </div>
 </template>
@@ -993,6 +1002,49 @@ const resumeGame = () => {
 
 th {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-fantasy {
+  background: linear-gradient(135deg, #e74c3c, #f1c40f, #3498db);
+  color: white;
+  font-size: 1.5rem;
+  padding: 15px 30px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-fantasy:hover {
+  background: linear-gradient(135deg, #2ecc71, #e74c3c, #9b59b6);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+
+.btn-fantasy:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.btn-fantasy:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-fantasy:disabled {
+  background: #ccc;
+  color: #777;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 .bounce-in-top {
