@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted, computed, watch } from 'vue'
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const drawnNumbers = ref([])
 const usedNumber = ref([])
-const randomBtnText = ref("Start Bingo Game")
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref("default")
+const level = ref('default')
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -35,9 +35,12 @@ onMounted(() => {
 
 // Randomly select 36 unique numbers
 const select36Numbers = () => {
-  while (drawnNumbers.value.length < 35) {
-    let randomIndex = Math.floor(Math.random() * numbers.value.length)
-    let number = numbers.value.splice(randomIndex, 1)[0]
+  drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
+  let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
+  while (drawnNumbers.value.length < 60) {
+    // เราต้องการ 36 ตัวเลข ไม่ใช่ 35
+    let randomIndex = Math.floor(Math.random() * availableNumbers.length)
+    let number = availableNumbers.splice(randomIndex, 1)[0]
     drawnNumbers.value.push(number)
   }
 }
@@ -45,25 +48,31 @@ const select36Numbers = () => {
 select36Numbers()
 
 const randomNumber = () => {
-  let randomIndex = Math.floor(Math.random() * drawnNumbers.value.length)
-  let number = drawnNumbers.value.splice(randomIndex, 1)[0]
-  usedNumber.value.push(number)
-  numberWhileRandom.value = number
-
+  // ถ้าไม่มีตัวเลขเหลือ ให้แสดงข้อความและจบการทำงาน
   if (drawnNumbers.value.length === 0) {
-    randomBtnText.value = "Out Of Number!"
-    clearInterval(autoRandomInterval)
-    showAlertLose.value = true
-    loseSoundPlay()
+    randomBtnText.value = 'Out Of Number!'
+    clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
+    showAlertLose.value = true // แสดงข้อความว่าแพ้
+    loseSoundPlay() // เล่นเสียงแพ้
+    return // จบการทำงานทันทีเมื่อไม่มีตัวเลขเหลือ
   }
-  toDisabledwhileRandom.value = true
+
+  // สุ่ม index ของตัวเลขจาก drawnNumbers
+  let randomIndex = Math.floor(Math.random() * drawnNumbers.value.length)
+  let number = drawnNumbers.value.splice(randomIndex, 1)[0] // ลบตัวเลขที่สุ่มออกจาก array
+  usedNumber.value.push(number) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ใช้แล้ว
+  numberWhileRandom.value = number // ตั้งค่าตัวเลขปัจจุบันเพื่อแสดง
+
+  toDisabledwhileRandom.value = true // ปิดการกดปุ่มขณะสุ่มตัวเลข
 }
 
+// ฟังก์ชัน watch ตัวเลขขณะสุ่ม
 watch(numberWhileRandom, (newValue) => {
   if (newValue !== null) {
-    highlightedNumbers.value.push(newValue)
+    highlightedNumbers.value.push(newValue) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ถูกไฮไลต์
   }
 })
+
 
 const isHighlighted = (number) => {
   return highlightedNumbers.value.includes(number)
@@ -93,7 +102,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
+      numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -121,7 +130,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref("")
+const musicPlayer = ref('')
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -131,19 +140,19 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref("")
+const clicksound = ref('')
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref("")
+const loseSoundEffect = ref('')
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref("")
+const winSoundEffect = ref('')
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
@@ -153,7 +162,7 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
 })
 
-console.log("visibleNumbers" + usedNumber.value)
+console.log('visibleNumbers' + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -221,34 +230,40 @@ const checkLineWin = () => {
 }
 
 const checkBlackoutWin = () => {
-  winSoundPlay()
   return selectedNumbers.value.length === 25 //ถ้าเลขที่เลือกเท่ากับ 25 ตัว
 }
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case "line":
+    case 'line':
       return checkLineWin()
-    case "blackout":
+    case 'blackout':
       return checkBlackoutWin()
     default:
       return false
   }
 })
 
-// auto-random-number
+const isResuming = ref(false)
+
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = "Randomizing..."
+  randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  }, 5000)
+  },4000)
 
-
-  alertCountdown.value = true
-  startCountdown()
+  // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
+  if (!isResuming.value) {
+    alertCountdown.value = true
+    startCountdown()
+  } else {
+    isResuming.value = false // Reset ค่าหลังจาก resume แล้ว
+  }
+  
   showWhileRandom.value = true
 }
+
 
 const startCountdown = () => {
   let interval = setInterval(() => {
@@ -257,18 +272,25 @@ const startCountdown = () => {
       clearInterval(interval)
       alertCountdown.value = false
     }
-  }, 2000)
+  }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 
+
+
 const handleBingoClick = () => {
+
   if (hasWon.value) {
+    pauseGame()
     winSoundPlay()
     showAlertWin.value = true
   }
 }
+
+const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
+
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
@@ -278,10 +300,49 @@ const resetGame = () => {
   gameStart.value = false
   usedNumber.value = []
   selectedNumbers.value = []
-  shuffleNumber()
-  randomBtnText.value = "Start Bingo Game"
-  numbers.value = Array.from(Array(76).keys()).splice(1)
+  highlightedNumbers.value = []
+  drawnNumbers.value = []
+  shuffleNumber() // รีเซ็ตตัวเลข
+  select36Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
+  randomBtnText.value = 'Start Bingo Game'
+  toDisabledwhileRandom.value = false
+  countdown.value = 4
+  alertCountdown.value = false
+  showCard1.value = false
+  showCard2.value = false
+  showWhileRandom.value = false
+  numberWhileRandom.value = null
+  clearInterval(autoRandomInterval)
+  autoRandomInterval = null
+  gamePaused.value = false
+  console.log(gamePaused.value)
 }
+
+
+
+
+// ฟังก์ชัน pause เกม
+const pauseGame = () => {
+  if (autoRandomInterval) {
+    clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
+    autoRandomInterval = null
+    gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
+    randomBtnText.value = 'Game Paused'
+  }
+}
+
+// ฟังก์ชัน resume เกม
+const resumeGame = () => {
+  if (gamePaused.value) {
+    isResuming.value = true
+    startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
+    gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
+    randomBtnText.value = 'Randomizing...'
+    
+  }
+}
+
+
 </script>
 
 <template>
@@ -575,11 +636,11 @@ const resetGame = () => {
                 v-for="col in 5"
                 :key="col"
                 class="border border-black"
-                :class="{
-                  'highlighted-cell': isHighlighted(
-                    bingoTable[col - 1][row - 1]
-                  ),
-                }"
+                :class="
+                  isHighlighted(bingoTable[col - 1][row - 1])
+                    ? 'highlighted-cell'
+                    : ''
+                "
               >
                 {{ bingoTable[col - 1][row - 1] }}
               </td>
@@ -594,6 +655,10 @@ const resetGame = () => {
           <label class="swap">
             <!-- this hidden checkbox controls the state -->
             <input type="checkbox" />
+
+            <audio controls ref="winSoundEffect" class="hidden">
+              <source src="/audio/winsound.mp3" type="audio/mp3" />
+            </audio>
 
             <audio controls ref="musicPlayer" class="hidden" loop>
               <source src="/audio/bgmusic1.mp3" type="audio/mp3" />
@@ -656,20 +721,48 @@ const resetGame = () => {
           </div>
         </div>
 
+        <!-- header button -->
         <div class="flex flex-row justify-center m-8">
-          <button class="btn mr-3 btn-error">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
+          <!-- pause btn -->
+          <div>
+            <!-- Pause  -->
+            <button
+              class="btn mr-3 btn-error mt-2"
+              @click="pauseGame"
+              v-if="gamePaused === false"
+              :disabled="!toDisabledwhileRandom"
             >
-              <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                
+                <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
+              </svg>
+            </button>
+
+            <!-- Resume  -->
+            <button
+              class="btn mr-3 btn-success mt-2"
+              @click="resumeGame"
+              v-if="gamePaused === true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <!-- ไอคอน resume (play icon) -->
+                <path fill="#ffffff" d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+          </div>
 
           <button
-            class="btn mr-3"
+            class="btn btn-lg btn-warning mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -679,7 +772,7 @@ const resetGame = () => {
           </button>
 
           <button
-            class="btn btn-warning"
+            class="btn btn-info mt-2"
             @click="shuffleNumber"
             :disabled="toDisabledwhileRandom"
           >
@@ -756,7 +849,8 @@ const resetGame = () => {
             </thead>
             <tbody>
               <tr v-for="i in 5" :key="i">
-                <td class="text-4xl"
+                <td
+                  class="text-4xl"
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
@@ -769,7 +863,7 @@ const resetGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1],
+                      usedNumber[usedNumber.length - 1]
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -794,9 +888,6 @@ const resetGame = () => {
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
-            <audio controls ref="winSoundEffect" class="hidden">
-              <source src="/audio/winsound.mp3" type="audio/mp3" />
-            </audio>
             <!-- Alert -->
             <div
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
@@ -994,7 +1085,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: "Jersey 20", sans-serif;
+  font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1043,7 +1134,7 @@ th {
 }
 
 .button:after {
-  content: "";
+  content: '';
   height: 100%;
   width: 100%;
   padding: 4px;
