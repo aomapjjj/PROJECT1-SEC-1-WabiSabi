@@ -251,7 +251,7 @@ const startAutoRandomNumber = () => {
   randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
     randomNumber()
-  },100)
+  },4000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -272,7 +272,7 @@ const startCountdown = () => {
       clearInterval(interval)
       alertCountdown.value = false
     }
-  }, 100)
+  }, 1000)
 }
 
 const showAlertLose = ref(false)
@@ -762,7 +762,7 @@ const resumeGame = () => {
           </div>
 
           <button
-            class="btn btn-lg  mr-3"
+            class="btn btn-lg btn-warning mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -772,7 +772,7 @@ const resumeGame = () => {
           </button>
 
           <button
-            class="btn btn-warning mt-2"
+            class="btn btn-info mt-2"
             @click="shuffleNumber"
             :disabled="toDisabledwhileRandom"
           >
