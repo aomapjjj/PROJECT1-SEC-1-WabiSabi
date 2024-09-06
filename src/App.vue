@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from "vue"
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const drawnNumbers = ref([])
 const usedNumber = ref([])
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -33,27 +33,23 @@ onMounted(() => {
   shuffleNumber()
 })
 
-// Randomly select 36 unique numbers
-const select36Numbers = () => {
+// Randomly select 60 unique numbers
+const select60Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
   let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
   while (drawnNumbers.value.length < 60) {
-    // เราต้องการ 36 ตัวเลข ไม่ใช่ 35
+    // เราต้องการ 60 ตัวเลข ไม่ใช่ 35
     let randomIndex = Math.floor(Math.random() * availableNumbers.length)
     let number = availableNumbers.splice(randomIndex, 1)[0]
     drawnNumbers.value.push(number)
   }
 }
 
-select36Numbers()
+select60Numbers()
 
 const randomNumber = () => {
   // ถ้าไม่มีตัวเลขเหลือ ให้แสดงข้อความและจบการทำงาน
-  if (drawnNumbers.value.length === 0) {
-    randomBtnText.value = 'Out Of Number!'
-    clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
-    showAlertLose.value = true // แสดงข้อความว่าแพ้
-    loseSoundPlay() // เล่นเสียงแพ้
+  if (drawnNumbers.value.length < 1) {
     return // จบการทำงานทันทีเมื่อไม่มีตัวเลขเหลือ
   }
 
@@ -101,7 +97,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -129,7 +125,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref('')
+const musicPlayer = ref("")
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -139,19 +135,19 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref('')
+const clicksound = ref("")
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref('')
+const loseSoundEffect = ref("")
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref('')
+const winSoundEffect = ref("")
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
@@ -161,7 +157,7 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
 })
 
-console.log('visibleNumbers' + usedNumber.value)
+console.log("visibleNumbers" + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -234,9 +230,9 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
+    case "line":
       return checkLineWin()
-    case 'blackout':
+    case "blackout":
       return checkBlackoutWin()
     default:
       return false
@@ -244,11 +240,16 @@ const hasWon = computed(() => {
 })
 
 const isResuming = ref(false)
+const endGameCountDown = ref(false)
 
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
+    if (drawnNumbers.value.length == 1) {
+      endGameCountDown.value = true
+      endCountdown()
+    }
     randomNumber()
   }, 4000)
 
@@ -268,13 +269,29 @@ const startCountdown = () => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(interval)
+      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้ ปรับเลย
       alertCountdown.value = false
+    }
+  }, 1000)
+}
+
+const endCountdown = () => {
+  let interval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(interval)
+      endGameCountDown.value = false
+      randomBtnText.value = "Out Of Number!"
+      clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
+      showAlertLose.value = true // แสดงข้อความว่าแพ้
+      loseSoundPlay() // เล่นเสียงแพ้
     }
   }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
+
 
 const handleBingoClick = () => {
   if (hasWon.value) {
@@ -297,9 +314,10 @@ const resetGame = () => {
   highlightedNumbers.value = []
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
-  select36Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = 'Start Bingo Game'
+  select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
+  randomBtnText.value = "Start Bingo Game"
   toDisabledwhileRandom.value = false
+  countPauseGame.value = 0
   countdown.value = 4
   alertCountdown.value = false
   showCard1.value = false
@@ -312,13 +330,19 @@ const resetGame = () => {
   console.log(gamePaused.value)
 }
 
+
+const countPauseGame = ref(0)
+
+
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
   if (autoRandomInterval) {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = 'Game Paused'
+    randomBtnText.value = "Game Paused"
+    countPauseGame.value++
+    console.log(countPauseGame.value)
   }
 }
 
@@ -328,11 +352,11 @@ const resumeGame = () => {
     isResuming.value = true
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
-    randomBtnText.value = 'Randomizing...'
+
+    randomBtnText.value = "Randomizing..."
+
   }
 }
-
-
 </script>
 
 <template>
@@ -597,11 +621,11 @@ const resumeGame = () => {
 
     <!-- game content -->
     <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-screen"
-    style="background-image: url('/public/img/bingopic2.jpg'); background-size: cover; background-position: center;" >
+    style="background-image: url('/img/bingopic1.jpg'); background-size: cover; background-position: center;" >
       <!-- Generate Bingo Table -->
-      <div class="w-1/4 flex flex-col justify-center items-center mt-10 ml-16">
+      <div class="w-2/5 flex flex-col justify-center items-center mt-10 ml-16">
         <table
-          class="table-sm bg-white m-1 rounded-lg table-zebra border border-black"
+          class="table-md bg-white m-1 rounded-lg table-zebra border border-black"
         >
           <thead>
             <tr>
@@ -663,7 +687,7 @@ const resumeGame = () => {
             <!-- volume on icon -->
             <svg
               @click="onOffMusic"
-              class="swap-on fill-current"
+              class="swap-on fill-current text-white"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -677,7 +701,7 @@ const resumeGame = () => {
             <!-- volume off icon -->
             <svg
               @click="onOffMusic"
-              class="swap-off fill-current"
+              class="swap-off fill-current text-red-100"
               xmlns="http://www.w3.org/2000/svg"
               width="48"
               height="48"
@@ -690,13 +714,22 @@ const resumeGame = () => {
           </label>
         </div>
 
+        <div class="w-40 mb-5" v-if="endGameCountDown">
+          <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div
+              class="bg-red-600 h-2.5 rounded-full"
+              :style="{ width: countdown * 10 + '%' }"
+            ></div>
+          </div>
+        </div>
+
         <!-- Header -->
         <div class="breadcrumbs text-xl bg-white border px-5 rounded-md">
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
             <li
-              :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }"
+              :style="{ color: drawnNumbers.length === 60 ? 'black' : 'red' }"
             >
               {{ drawnNumbers.length }} Balls Left!
             </li>
@@ -722,7 +755,11 @@ const resumeGame = () => {
               class="btn mr-3 btn-error mt-2"
               @click="pauseGame"
               v-if="gamePaused === false"
-              :disabled="!toDisabledwhileRandom"
+              :disabled="
+                !toDisabledwhileRandom ||
+                countPauseGame === 3 ||
+                drawnNumbers.length < 21
+              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -823,7 +860,7 @@ const resumeGame = () => {
       </div>
 
       <!-- Bingo Board -->
-      <div class="bounce-in-top w-1/2 flex justify-center items-center">
+      <div class="w-1/2 flex justify-center items-center">
         <div class="w-4/5">
           <table
             class="jersey-20-regular table-md bg-white m-9 rounded-md table-zebra"
@@ -854,7 +891,7 @@ const resumeGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -873,9 +910,8 @@ const resumeGame = () => {
               BINGO
             </button>
           </div>
-
           <!-- Alert Win -->
-          <div
+      <div
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
@@ -949,8 +985,11 @@ const resumeGame = () => {
               </div>
             </div>
           </div>
+          
+          
         </div>
       </div>
+      
     </div>
   </div>
 </template>
@@ -1119,7 +1158,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1168,7 +1207,7 @@ th {
 }
 
 .button:after {
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
   padding: 4px;
