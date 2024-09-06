@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from "vue"
 
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
 const drawnNumbers = ref([])
 const usedNumber = ref([])
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -33,27 +33,23 @@ onMounted(() => {
   shuffleNumber()
 })
 
-// Randomly select 36 unique numbers
-const select36Numbers = () => {
+// Randomly select 60 unique numbers
+const select60Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
   let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
   while (drawnNumbers.value.length < 60) {
-    // เราต้องการ 36 ตัวเลข ไม่ใช่ 35
+    // เราต้องการ 60 ตัวเลข ไม่ใช่ 35
     let randomIndex = Math.floor(Math.random() * availableNumbers.length)
     let number = availableNumbers.splice(randomIndex, 1)[0]
     drawnNumbers.value.push(number)
   }
 }
 
-select36Numbers()
+select60Numbers()
 
 const randomNumber = () => {
   // ถ้าไม่มีตัวเลขเหลือ ให้แสดงข้อความและจบการทำงาน
-  if (drawnNumbers.value.length === 0) {
-    randomBtnText.value = 'Out Of Number!'
-    clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
-    showAlertLose.value = true // แสดงข้อความว่าแพ้
-    loseSoundPlay() // เล่นเสียงแพ้
+  if (drawnNumbers.value.length < 1) {
     return // จบการทำงานทันทีเมื่อไม่มีตัวเลขเหลือ
   }
 
@@ -72,7 +68,6 @@ watch(numberWhileRandom, (newValue) => {
     highlightedNumbers.value.push(newValue) // เพิ่มตัวเลขที่สุ่มได้ไปยังตัวเลขที่ถูกไฮไลต์
   }
 })
-
 
 const isHighlighted = (number) => {
   return highlightedNumbers.value.includes(number)
@@ -102,7 +97,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
+      numberOnBoard[currentIndex],
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -130,7 +125,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref('')
+const musicPlayer = ref("")
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -140,19 +135,19 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref('')
+const clicksound = ref("")
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref('')
+const loseSoundEffect = ref("")
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref('')
+const winSoundEffect = ref("")
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
@@ -162,7 +157,7 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-5)
 })
 
-console.log('visibleNumbers' + usedNumber.value)
+console.log("visibleNumbers" + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -235,9 +230,9 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
+    case "line":
       return checkLineWin()
-    case 'blackout':
+    case "blackout":
       return checkBlackoutWin()
     default:
       return false
@@ -245,14 +240,18 @@ const hasWon = computed(() => {
 })
 
 const isResuming = ref(false)
+const endGameCountDown = ref(false)
 
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
+    if (drawnNumbers.value.length == 1) {
+      endGameCountDown.value = true
+      endCountdown()
+    }
     randomNumber()
-  },4000)
-
+  }, 4000)
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
     alertCountdown.value = true
@@ -260,17 +259,32 @@ const startAutoRandomNumber = () => {
   } else {
     isResuming.value = false // Reset ค่าหลังจาก resume แล้ว
   }
-  
+
   showWhileRandom.value = true
 }
-
 
 const startCountdown = () => {
   let interval = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(interval)
+      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้ ปรับเลย
       alertCountdown.value = false
+    }
+  }, 1000)
+}
+
+
+const endCountdown = () => {
+  let interval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(interval)
+      endGameCountDown.value = false
+      randomBtnText.value = "Out Of Number!"
+      clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
+      showAlertLose.value = true // แสดงข้อความว่าแพ้
+      loseSoundPlay() // เล่นเสียงแพ้
     }
   }, 1000)
 }
@@ -278,10 +292,7 @@ const startCountdown = () => {
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 
-
-
 const handleBingoClick = () => {
-
   if (hasWon.value) {
     pauseGame()
     winSoundPlay()
@@ -290,7 +301,6 @@ const handleBingoClick = () => {
 }
 
 const gamePaused = ref(false) // ตัวแปรสำหรับเช็คสถานะการ pause
-
 
 // ฟังก์ชันที่ใช้รีเซ็ตเกม
 const resetGame = () => {
@@ -303,9 +313,10 @@ const resetGame = () => {
   highlightedNumbers.value = []
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
-  select36Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = 'Start Bingo Game'
+  select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
+  randomBtnText.value = "Start Bingo Game"
   toDisabledwhileRandom.value = false
+  countPauseGame.value = 0
   countdown.value = 4
   alertCountdown.value = false
   showCard1.value = false
@@ -318,8 +329,7 @@ const resetGame = () => {
   console.log(gamePaused.value)
 }
 
-
-
+const countPauseGame = ref(0)
 
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
@@ -327,7 +337,9 @@ const pauseGame = () => {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = 'Game Paused'
+    randomBtnText.value = "Game Paused"
+    countPauseGame.value++
+    console.log(countPauseGame.value)
   }
 }
 
@@ -337,12 +349,9 @@ const resumeGame = () => {
     isResuming.value = true
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
-    randomBtnText.value = 'Randomizing...'
-    
+    randomBtnText.value = "Randomizing..."
   }
 }
-
-
 </script>
 
 <template>
@@ -698,13 +707,22 @@ const resumeGame = () => {
           </label>
         </div>
 
+        <div class="w-40 mb-5" v-if="endGameCountDown">
+          <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div
+              class="bg-red-600 h-2.5 rounded-full"
+              :style="{ width: countdown * 10 + '%' }"
+            ></div>
+          </div>
+        </div>
+
         <!-- Header -->
         <div class="breadcrumbs text-xl border px-5 border-black rounded-md">
           <ul>
             <li class="font-normal">MODE</li>
             <li class="font-semibold">{{ level.toUpperCase() }}</li>
             <li
-              :style="{ color: drawnNumbers.length === 35 ? 'black' : 'red' }"
+              :style="{ color: drawnNumbers.length === 60 ? 'black' : 'red' }"
             >
               {{ drawnNumbers.length }} Balls Left!
             </li>
@@ -730,7 +748,11 @@ const resumeGame = () => {
               class="btn mr-3 btn-error mt-2"
               @click="pauseGame"
               v-if="gamePaused === false"
-              :disabled="!toDisabledwhileRandom"
+              :disabled="
+                !toDisabledwhileRandom ||
+                countPauseGame === 3 ||
+                drawnNumbers.length < 21
+              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -738,7 +760,6 @@ const resumeGame = () => {
                 height="32"
                 viewBox="0 0 24 24"
               >
-                
                 <path fill="#ffffff" d="M14 19h4V5h-4M6 19h4V5H6z" />
               </svg>
             </button>
@@ -863,7 +884,7 @@ const resumeGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1]
+                      usedNumber[usedNumber.length - 1],
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -1085,7 +1106,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1134,7 +1155,7 @@ th {
 }
 
 .button:after {
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
   padding: 4px;
