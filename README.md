@@ -25,8 +25,9 @@
 
 ## Application Features
 
-1. **Feature 1: [Feature Name]**
-   - Description: A concise explanation of this feature and its function in the app.
+1. **Feature 1: เลือกเล่นเกมบิงโกได้ 2 Mode**
+   - Mode Line Pattern
+   - Mode Blackout Pattern
 
 2. **Feature 2: [Feature Name]**
    - Description: A concise explanation of this feature and its function in the app.
