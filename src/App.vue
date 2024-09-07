@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted, computed, watch } from 'vue'
 
 // random number to
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
@@ -11,12 +11,12 @@ let autoRandomInterval = null
 const usedNumber = ref([])
 
 // button
-const randomBtnText = ref("Start Bingo Game")
+const randomBtnText = ref('Start Bingo Game')
 const toDisabledwhileRandom = ref(false)
 
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref("default")
+const level = ref('default')
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -121,7 +121,7 @@ const toggleSelection = (number) => {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
       )
-    } else if(gamePaused.value === false) {
+    } else if (gamePaused.value === false) {
       selectedNumbers.value.push(number)
       clickMusic()
     }
@@ -134,7 +134,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref("")
+const musicPlayer = ref('')
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -144,44 +144,35 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref("")
+const clicksound = ref('')
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref("")
+const loseSoundEffect = ref('')
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref("")
+const winSoundEffect = ref('')
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
 }
 
-const bingoSoundEffect = ref(null)
+const bingoSoundEffect = ref('')
 
 const bingoSoundPlay = () => {
-  if (bingoSoundEffect.value) {
-    // เช็คว่าตัว audio ถูกอ้างอิงแล้ว
-    console.log("Playing Bingo Sound")
-    bingoSoundEffect.value.play().catch(error => {
-      console.log("Error playing sound:", error)
-    })
-  } else {
-    console.log("Bingo sound effect not loaded")
-  }
+  bingoSoundEffect.value.play()
 }
-
 
 const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-3)
 })
 
-console.log("visibleNumbers" + usedNumber.value)
+console.log('visibleNumbers' + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -254,9 +245,9 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case "line":
+    case 'line':
       return checkLineWin()
-    case "blackout":
+    case 'blackout':
       return checkBlackoutWin()
     default:
       return false
@@ -269,14 +260,14 @@ const endGameCountDown = ref(false)
 // auto random
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = "Randomizing..."
+  randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
     if (drawnNumbers.value.length == 1) {
       endGameCountDown.value = true
       endCountdown()
     }
     randomNumber()
-  }, 4000)
+  }, 200)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -310,7 +301,7 @@ const endCountdown = () => {
     if (countdown.value < 0) {
       clearInterval(interval)
       endGameCountDown.value = false
-      randomBtnText.value = "Out Of Number!"
+      randomBtnText.value = 'Out Of Number!'
       clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
       showAlertLose.value = true // แสดงข้อความว่าแพ้
       loseSoundPlay() // เล่นเสียงแพ้
@@ -320,14 +311,14 @@ const endCountdown = () => {
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
-const isBingoClicked =ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
+const isBingoClicked = ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
 
 const handleBingoClick = () => {
   isBingoClicked.value = true
   clearInterval(autoRandomInterval)
   if (hasWon.value) {
     pauseGame()
-    // winSoundPlay()
+    winSoundPlay()
     bingoSoundPlay()
     showAlertWin.value = true
   }
@@ -347,7 +338,7 @@ const resetGame = () => {
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
   select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = "Start Bingo Game"
+  randomBtnText.value = 'Start Bingo Game'
   toDisabledwhileRandom.value = false
   countPauseGame.value = 0
   countdown.value = 4
@@ -372,7 +363,7 @@ const pauseGame = () => {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = "Game Pause"
+    randomBtnText.value = 'Game Pause'
     countPauseGame.value++
     console.log(countPauseGame.value)
   }
@@ -385,7 +376,7 @@ const resumeGame = () => {
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
 
-    randomBtnText.value = "Randomizing..."
+    randomBtnText.value = 'Randomizing...'
   }
 }
 </script>
@@ -394,7 +385,7 @@ const resumeGame = () => {
   <div class="relative w-full h-full">
     <!-- Video Background -->
     <video
-      class="absolute top-0 left-0 w-full object-cover h-screen"
+      class="absolute top-0 left-0 w-full object-cover h-[60vh] mobileS:h-[50vh] mobileM:h-[55vh] mobileL:h-[60vh] tablet:h-[80vh] laptop:h-[70vh] desktop:h-[90vh] desktopL:h-screen"
       autoplay
       loop
       muted
@@ -403,11 +394,16 @@ const resumeGame = () => {
     </video>
 
     <!-- Level Selection -->
-    <div class="absolute inset-0 flex flex-col mt-32 ml-4" v-if="!gameStart">
+    <div
+      class="absolute inset-0 flex flex-col mt-16 mobileS:mt-8 mobileM:mt-10 mobileL:mt-12 tablet:mt-24 laptop:mt-32 ml-2 mobileS:ml-1 mobileM:ml-2 mobileL:ml-3 tablet:ml-4 laptop:ml-6"
+      v-if="!gameStart"
+    >
       <div class="text-focus-in">
         <div class="flex items-center justify-between">
           <div class="">
-            <div class="text-7xl m-5 flex items-center">
+            <div
+              class="m-5 flex items-center text-4xl mobileS:text-3xl mobileM:text-3xl mobileL:text-4xl tablet:text-6xl laptop:text-7xl"
+            >
               <p>
                 Dive into the Fun <br />with
                 <span class="text-red-500 jersey-20-regular">B</span>
@@ -418,7 +414,7 @@ const resumeGame = () => {
                 <span> Game</span>
               </p>
               <svg
-                class="mt-20"
+                class="mt-10 mobileS:mt-5 tablet:mt-16 laptop:mt-20"
                 xmlns="http://www.w3.org/2000/svg"
                 width="64"
                 height="64"
@@ -461,7 +457,9 @@ const resumeGame = () => {
                 />
               </svg>
             </div>
-            <div class="flex items-center space-x-4 mt-5 ml-5 px-4 py-3">
+            <div
+              class="flex items-center space-x-2 ml-2 mt-3 mobileS:ml-1 mobileS:space-x-1 tablet:ml-4 tablet:space-x-4 tablet:mt-5 px-4 py-3"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -518,7 +516,11 @@ const resumeGame = () => {
                   d="M10 22.75a1.75 1.75 0 0 1 3.5 0m21 0a1.75 1.75 0 0 1 3.5 0"
                 />
               </svg>
-              <p class="text-4xl">Choose Your Game Mode</p>
+              <p
+                class="text-2xl mobileS:text-xl mobileM:text-2xl tablet:text-3xl laptop:text-4xl"
+              >
+                Choose Your Game Mode
+              </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -600,15 +602,19 @@ const resumeGame = () => {
           <!-- v-if="showCard1" -->
           <div class="flex justify-end" v-if="showCard1">
             <div
-              class="card bg-white w-96 shadow-xl mr-24 rounded-lg overflow-hidden border-4 border-yellow-400"
+              class="card bg-white w-80 tablet:w-96 shadow-xl mr-16 tablet:mr-24 rounded-lg overflow-hidden border-4 border-yellow-400"
             >
               <div
-                class="card-body text-center h-48 flex flex-col justify-center items-center"
+                class="card-body text-center h-36 tablet:h-48 flex flex-col justify-center items-center"
               >
-                <h2 class="card-title text-3xl font-bold text-yellow-400 mb-6">
+                <h2
+                  class="card-title text-xl tablet:text-3xl font-bold text-yellow-400 mb-4 tablet:mb-6"
+                >
                   Line Win Pattern
                 </h2>
-                <p class="text-lg text-green-700 font-semibold mt-2">
+                <p
+                  class="text-md tablet:text-lg text-green-700 font-semibold mt-2"
+                >
                   Your goal is to mark 5 matching numbers on your card in either
                   of the following patterns ^^!
                 </p>
@@ -617,7 +623,7 @@ const resumeGame = () => {
                 <img
                   src="/img/bingoWinLine.png"
                   alt="Line"
-                  class="w-56 h-56 object-contain"
+                  class="w-48 h-48 object-contain tablet:w-56 tablet:h-56"
                 />
               </figure>
             </div>
@@ -625,22 +631,26 @@ const resumeGame = () => {
 
           <div class="flex justify-end" v-if="showCard2">
             <div
-              class="card bg-white w-96 shadow-xl mr-24 rounded-lg overflow-hidden border-4 border-blue-400"
+              class="card bg-white w-80 tablet:w-96 shadow-xl mr-16 tablet:mr-24 rounded-lg overflow-hidden border-4 border-blue-400"
             >
               <div
-                class="card-body text-center h-48 flex flex-col justify-center items-center"
+                class="card-body text-center h-36 tablet:h-48 flex flex-col justify-center items-center"
               >
-                <h2 class="card-title text-3xl font-bold text-blue-400 mb-6">
+                <h2
+                  class="card-title text-xl tablet:text-3xl font-bold text-blue-400 mb-4 tablet:mb-6"
+                >
                   Blackout Win Pattern
                 </h2>
-                <p class="text-lg text-green-700 font-semibold mt-2">
+                <p
+                  class="text-md tablet:text-lg text-green-700 font-semibold mt-2"
+                >
                   Daub every number<br />
                   on your card ^^!
                 </p>
               </div>
               <figure>
                 <img
-                  class="w-56 h-56 object-contain"
+                  class="w-48 h-48 object-contain tablet:w-56 tablet:h-56"
                   src="/img/bingoWinBlackout.png"
                   alt="Blackout"
                 />
@@ -654,15 +664,12 @@ const resumeGame = () => {
     <!-- game content -->
     <div
       v-if="gameStart"
-      class="relative z-10 flex flex-row w-full h-screen"
-      style="
-        background-image: url('/img/bg7.png');
-        background-size: cover;
-        background-position: center;
-      "
+      class="relative z-10 flex flex-row w-full min-h-screen bg-no-repeat bg-center bg-cover bg-[url('/img/bg7.png')] mobileS:min-h-[50vh] mobileM:min-h-[55vh] mobileL:min-h-[60vh] tablet:min-h-[80vh] laptop:min-h-[70vh] desktop:min-h-[90vh] desktopL:min-h-screen"
     >
       <!-- Generate Bingo Table -->
-      <div class="w-2/5 flex flex-col justify-center items-center mt-2 ml-16">
+      <div
+        class="w-full tablet:w-2/5 flex flex-col justify-center items-center mt-2 ml-4 tablet:ml-16"
+      >
         <table
           class="table-md bg-white m-1 rounded-lg table-zebra border border-black"
         >
@@ -724,7 +731,7 @@ const resumeGame = () => {
             </audio>
 
             <audio controls ref="bingoSoundEffect" class="hidden">
-              <source src="/audio/bingo.mp3" type="audio/mp3" />
+              <source src="/audio/bingo2.mp3" type="audio/mp3" />
             </audio>
 
             <!-- volume on icon -->
@@ -760,9 +767,9 @@ const resumeGame = () => {
         <div class="w-40 mb-5" v-if="endGameCountDown">
           <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
             <div
-              class="bg-red-600 h-2.5 rounded-full"
+              class="bg-red-500 h-2.5 rounded-full"
               :style="{ width: countdown * 10 + '%' }"
-               style="transition: width 1s linear;"
+              style="transition: width 1s linear"
             ></div>
           </div>
         </div>
@@ -780,7 +787,7 @@ const resumeGame = () => {
           </ul>
         </div>
 
-        <div class="flex flex-row items-center mt-6">
+        <div class="flex flex-row items-center mt-6 rotate-center">
           <div>
             <svg
               width="150"
@@ -1030,33 +1037,62 @@ const resumeGame = () => {
       <!-- Countdown Popup -->
       <div
         v-show="alertCountdown"
-        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
       >
-        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
-          <p class="text-3xl font-bold">Starting in {{ countdown }} seconds</p>
+        <div class="bg-transparent p-8 rounded-lg text-center">
+          <p
+            class="text-6xl font-extrabold text-white animate-pulse transition-all duration-500"
+          >
+            {{ countdown }}
+          </p>
+          <p class="text-2xl font-semibold text-gray-300 mt-4">Get ready!</p>
         </div>
       </div>
 
       <!-- Bingo Board -->
-      <div class="w-1/2 flex justify-center items-center">
-        <div class="w-4/5">
+      <div
+        class="w-full tablet:w-1/2 flex flex-col justify-center items-center"
+      >
+        <div
+          class="w-full mobileM:w-11/12 tablet:w-4/5 flex flex-col items-center"
+        >
           <table
-            class="jersey-20-regular table-md bg-white m-9 rounded-md table-zebra"
+            class="jersey-20-regular table-md bg-white mobileM:m-6 tablet:m-9 rounded-md table-zebra"
           >
             <!-- head -->
             <thead>
               <tr>
-                <th class="bg-red-500 text-white text-3xl">B</th>
-                <th class="bg-yellow-500 text-white text-3xl">I</th>
-                <th class="bg-green-500 text-white text-3xl">N</th>
-                <th class="bg-blue-500 text-white text-3xl">G</th>
-                <th class="bg-purple-500 text-white text-3xl">O</th>
+                <th
+                  class="bg-red-500 text-white text-base tablet:text-2xl laptop:text-3xl"
+                >
+                  B
+                </th>
+                <th
+                  class="bg-yellow-500 text-white text-base tablet:text-2xl laptop:text-3xl"
+                >
+                  I
+                </th>
+                <th
+                  class="bg-green-500 text-white text-base tablet:text-2xl laptop:text-3xl"
+                >
+                  N
+                </th>
+                <th
+                  class="bg-blue-500 text-white text-base tablet:text-2xl laptop:text-3xl"
+                >
+                  G
+                </th>
+                <th
+                  class="bg-purple-500 text-white text-base tablet:text-2xl laptop:text-3xl"
+                >
+                  O
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="i in 5" :key="i">
                 <td
-                  class="text-4xl"
+                  class="text-base tablet:text-2xl laptop:text-4xl"
                   v-for="j in 5"
                   :key="j"
                   :id="shuffledNumbers[(i - 1) * 5 + (j - 1)]?.toString()"
@@ -1079,9 +1115,9 @@ const resumeGame = () => {
           </table>
 
           <!-- Add Bingo! button below the Bingo board -->
-          <div class="w-full flex justify-center items-center m-2">
+          <div class="w-full flex justify-center items-center">
             <button
-              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-8 rounded-full text-3xl border-2 border-white -mt-12"
+              class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-6 mobileM:px-8 tablet:px-10 rounded-full text-xl mobileM:text-2xl tablet:text-3xl border-2 border-white -mt-8 tablet:-mt-12"
               :disabled="!hasWon"
               @click="handleBingoClick"
             >
@@ -1095,7 +1131,7 @@ const resumeGame = () => {
           >
             <!-- Alert -->
             <div
-              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-72 mobileM:w-80 tablet:w-96 overflow-hidden"
             >
               <!-- Video Background -->
               <video
@@ -1110,7 +1146,9 @@ const resumeGame = () => {
 
               <!-- Content over Video -->
               <div class="relative z-10 card-body text-white">
-                <h2 class="card-title">Awesome!</h2>
+                <h2 class="card-title text-lg mobileM:text-xl tablet:text-2xl">
+                  Awesome!
+                </h2>
                 <p class="">You’re the bingo winner!</p>
                 <div class="card-actions justify-end">
                   <button
@@ -1135,7 +1173,7 @@ const resumeGame = () => {
 
             <!-- Alert -->
             <div
-              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-96 overflow-hidden"
+              class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-72 mobileM:w-80 tablet:w-96 overflow-hidden"
             >
               <!-- Video Background -->
               <video
@@ -1150,7 +1188,9 @@ const resumeGame = () => {
 
               <!-- Content over Video -->
               <div class="relative z-10 card-body text-white">
-                <h2 class="card-title">You Lose!</h2>
+                <h2 class="card-title text-lg mobileM:text-xl tablet:text-2xl">
+                  You Lose!
+                </h2>
                 <p class="">Better luck next time</p>
                 <div class="card-actions justify-end">
                   <button
@@ -1203,7 +1243,7 @@ th {
 }
 
 .start-button::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 10%;
   left: 10%;
@@ -1215,7 +1255,7 @@ th {
 }
 
 .start-button::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 10%;
   right: 10%;
@@ -1225,49 +1265,6 @@ th {
   border-radius: 50px;
   filter: blur(2px);
 }
-
-/* .btn-fantasy {
-  background: linear-gradient(135deg, #e74c3c, #f1c40f, #3498db);
-  color: white;
-  font-size: 1.5rem;
-  padding: 15px 30px;
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-fantasy:hover {
-  background: linear-gradient(135deg, #2ecc71, #e74c3c, #9b59b6);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
-  transform: translateY(-3px);
-}
-
-.btn-fantasy:before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.btn-fantasy:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.btn-fantasy:disabled {
-  background: #ccc;
-  color: #777;
-  box-shadow: none;
-  cursor: not-allowed;
-} */
 
 .bounce-in-top {
   -webkit-animation: bounce-in-top 1.1s both;
@@ -1380,7 +1377,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: "Jersey 20", sans-serif;
+  font-family: 'Jersey 20', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1429,7 +1426,7 @@ th {
 }
 
 .button:after {
-  content: "";
+  content: '';
   height: 100%;
   width: 100%;
   padding: 4px;
@@ -1479,6 +1476,44 @@ th {
     -webkit-filter: blur(0px);
     filter: blur(0px);
     opacity: 1;
+  }
+}
+.text-6xl {
+  animation: grow 0.5s ease-in-out;
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.rotate-center {
+  -webkit-animation: rotate-center 4s ease-in-out both infinite;
+  animation: rotate-center 4s ease-in-out both infinite;
+}
+@-webkit-keyframes rotate-center {
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotate-center {
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 </style>
