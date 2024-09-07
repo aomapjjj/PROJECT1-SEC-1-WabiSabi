@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from "vue"
 
 // random number to
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
@@ -11,12 +11,12 @@ let autoRandomInterval = null
 const usedNumber = ref([])
 
 // button
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -121,7 +121,7 @@ const toggleSelection = (number) => {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
       )
-    } else {
+    } else if(gamePaused.value === false) {
       selectedNumbers.value.push(number)
       clickMusic()
     }
@@ -134,7 +134,7 @@ const isSelected = (number) => {
 
 //console.log("selectedNumbers.value", selectedNumbers.value)
 
-const musicPlayer = ref('')
+const musicPlayer = ref("")
 const playingMusic = ref(false)
 
 const onOffMusic = () => {
@@ -144,35 +144,44 @@ const onOffMusic = () => {
   console.log(playingMusic.value)
 }
 
-const clicksound = ref('')
+const clicksound = ref("")
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref('')
+const loseSoundEffect = ref("")
 
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref('')
+const winSoundEffect = ref("")
 
 const winSoundPlay = () => {
   winSoundEffect.value.play()
 }
 
-const bingoSoundEffect = ref('')
+const bingoSoundEffect = ref(null)
 
-const BingoSoundPlay = () => {
-  winSoundEffect.value.play()
+const bingoSoundPlay = () => {
+  if (bingoSoundEffect.value) {
+    // เช็คว่าตัว audio ถูกอ้างอิงแล้ว
+    console.log("Playing Bingo Sound")
+    bingoSoundEffect.value.play().catch(error => {
+      console.log("Error playing sound:", error)
+    })
+  } else {
+    console.log("Bingo sound effect not loaded")
+  }
 }
+
 
 const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-3)
 })
 
-console.log('visibleNumbers' + usedNumber.value)
+console.log("visibleNumbers" + usedNumber.value)
 
 //console.log(visibleNumbers)
 
@@ -245,9 +254,9 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
+    case "line":
       return checkLineWin()
-    case 'blackout':
+    case "blackout":
       return checkBlackoutWin()
     default:
       return false
@@ -260,14 +269,14 @@ const endGameCountDown = ref(false)
 // auto random
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     if (drawnNumbers.value.length == 1) {
       endGameCountDown.value = true
       endCountdown()
     }
     randomNumber()
-  }, 5000)
+  }, 4000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -285,7 +294,7 @@ const startCountdown = () => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(interval)
-      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้ ปรับเลย
+      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้
       alertCountdown.value = false
     }
   }, 1000)
@@ -293,11 +302,15 @@ const startCountdown = () => {
 
 const endCountdown = () => {
   let interval = setInterval(() => {
+    if (isBingoClicked.value) {
+      clearInterval(interval)
+      return
+    }
     countdown.value--
-    if (countdown.value <= 0) {
+    if (countdown.value < 0) {
       clearInterval(interval)
       endGameCountDown.value = false
-      randomBtnText.value = 'Out Of Number!'
+      randomBtnText.value = "Out Of Number!"
       clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
       showAlertLose.value = true // แสดงข้อความว่าแพ้
       loseSoundPlay() // เล่นเสียงแพ้
@@ -307,12 +320,15 @@ const endCountdown = () => {
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
+const isBingoClicked =ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
 
 const handleBingoClick = () => {
+  isBingoClicked.value = true
+  clearInterval(autoRandomInterval)
   if (hasWon.value) {
     pauseGame()
-    winSoundPlay()
-    BingoSoundPlay()
+    // winSoundPlay()
+    bingoSoundPlay()
     showAlertWin.value = true
   }
 }
@@ -331,7 +347,7 @@ const resetGame = () => {
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
   select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = 'Start Bingo Game'
+  randomBtnText.value = "Start Bingo Game"
   toDisabledwhileRandom.value = false
   countPauseGame.value = 0
   countdown.value = 4
@@ -344,6 +360,8 @@ const resetGame = () => {
   autoRandomInterval = null
   gamePaused.value = false
   console.log(gamePaused.value)
+  isBingoClicked.value = false
+  endGameCountDown.value = false
 }
 
 const countPauseGame = ref(0)
@@ -354,7 +372,7 @@ const pauseGame = () => {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = 'Game Paused'
+    randomBtnText.value = "Game Pause"
     countPauseGame.value++
     console.log(countPauseGame.value)
   }
@@ -367,7 +385,7 @@ const resumeGame = () => {
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
 
-    randomBtnText.value = 'Randomizing...'
+    randomBtnText.value = "Randomizing..."
   }
 }
 </script>
@@ -744,6 +762,7 @@ const resumeGame = () => {
             <div
               class="bg-red-600 h-2.5 rounded-full"
               :style="{ width: countdown * 10 + '%' }"
+               style="transition: width 1s linear;"
             ></div>
           </div>
         </div>
@@ -785,7 +804,7 @@ const resumeGame = () => {
                 stroke="#000"
                 stroke-width="2"
               />
-              
+
               <text
                 x="60"
                 y="60"
@@ -807,7 +826,7 @@ const resumeGame = () => {
               <div
                 v-for="(num, index) in visibleNumbers.toReversed()"
                 :key="index"
-                class="flex w-28 h-28 items-center justify-center rounded-full shadow-lg"
+                class="flex w-28 h-28 items-center justify-center rounded-full shadow-lg border-2 border-white"
               >
                 <svg
                   width="150"
@@ -931,39 +950,81 @@ const resumeGame = () => {
         </div>
 
         <div class="flex gap-2">
-
-          <svg v-show="countPauseGame === 0" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-          <svg v-show="countPauseGame === 0" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-          <svg v-show="countPauseGame === 0" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-
-          <svg v-show="countPauseGame === 1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-          <svg v-show="countPauseGame === 1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-
-          <svg v-show="countPauseGame === 2" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#fff152" d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"/></svg>
-
-          
-
-        </div>
-
-        <div class="flex flex-col items-center mt-8" v-show="showWhileRandom">
-          <!-- Display the first 5 numbers -->
-          <div
-            class="relative p-6 border-4 border-blue-500 rounded-full bg-white shadow-xl flex items-center justify-center w-[450px] h-[100px]"
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
           >
-            <div class="flex flex-row gap-4">
-              <div
-                v-for="(num, index) in visibleNumbers.toReversed()"
-                :key="index"
-                class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
-              >
-                <p class="text-2xl font-bold text-white">
-                  {{ num }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
 
+          <svg
+            v-show="countPauseGame === 1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+
+          <svg
+            v-show="countPauseGame === 2"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+        </div>
       </div>
 
       <!-- Countdown Popup -->
@@ -1119,7 +1180,7 @@ th {
 }
 
 .start-button {
-  background: linear-gradient(180deg, #F1C40F, #E91E63);
+  background: linear-gradient(180deg, #f1c40f, #e91e63);
   border: 3px solid #feee9f;
   border-radius: 50px;
   color: white;
@@ -1142,7 +1203,7 @@ th {
 }
 
 .start-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 10%;
   left: 10%;
@@ -1154,7 +1215,7 @@ th {
 }
 
 .start-button::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 10%;
   right: 10%;
@@ -1319,7 +1380,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1368,7 +1429,7 @@ th {
 }
 
 .button:after {
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
   padding: 4px;
