@@ -1,19 +1,30 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue"
 
+// random number to
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
+
+// auto random
 const drawnNumbers = ref([])
+let autoRandomInterval = null
+
 const usedNumber = ref([])
+
+// button
 const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
+
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
 const level = ref("default")
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
+
+// win pattern
 const showCard1 = ref(false)
 const showCard2 = ref(false)
+
 const showWhileRandom = ref(false)
 const numberWhileRandom = ref()
 
@@ -21,8 +32,6 @@ const numberWhileRandom = ref()
 const allNumbers = ref(Array.from(Array(76).keys()).splice(1))
 const bingoTable = ref([[], [], [], [], []])
 const highlightedNumbers = ref([])
-
-let autoRandomInterval = null
 
 const setLevel = (newLevel) => {
   gameStart.value = true
@@ -37,7 +46,7 @@ onMounted(() => {
 const select60Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
   let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
-  while (drawnNumbers.value.length < 60) {
+  while (drawnNumbers.value.length < 75) {
     // เราต้องการ 60 ตัวเลข ไม่ใช่ 35
     let randomIndex = Math.floor(Math.random() * availableNumbers.length)
     let number = availableNumbers.splice(randomIndex, 1)[0]
@@ -97,7 +106,7 @@ const shuffleNumber = () => {
     currentIndex--
     ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
       numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex],
+      numberOnBoard[currentIndex]
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
@@ -153,8 +162,23 @@ const winSoundPlay = () => {
   winSoundEffect.value.play()
 }
 
+const bingoSoundEffect = ref(null)
+
+const bingoSoundPlay = () => {
+  if (bingoSoundEffect.value) {
+    // เช็คว่าตัว audio ถูกอ้างอิงแล้ว
+    console.log("Playing Bingo Sound")
+    bingoSoundEffect.value.play().catch(error => {
+      console.log("Error playing sound:", error)
+    })
+  } else {
+    console.log("Bingo sound effect not loaded")
+  }
+}
+
+
 const visibleNumbers = computed(() => {
-  return usedNumber.value.slice(-5)
+  return usedNumber.value.slice(-3)
 })
 
 console.log("visibleNumbers" + usedNumber.value)
@@ -242,6 +266,7 @@ const hasWon = computed(() => {
 const isResuming = ref(false)
 const endGameCountDown = ref(false)
 
+// auto random
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
   randomBtnText.value = "Randomizing..."
@@ -251,7 +276,7 @@ const startAutoRandomNumber = () => {
       endCountdown()
     }
     randomNumber()
-  }, 4000)
+  }, 200)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -279,6 +304,10 @@ const endCountdown = () => {
   let interval = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
+      if(hasWon.value){
+        endGameCountDown.value = false
+        countdown.value
+      }else{
       clearInterval(interval)
       endGameCountDown.value = false
       randomBtnText.value = "Out Of Number!"
@@ -286,17 +315,18 @@ const endCountdown = () => {
       showAlertLose.value = true // แสดงข้อความว่าแพ้
       loseSoundPlay() // เล่นเสียงแพ้
     }
+    }
   }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 
-
 const handleBingoClick = () => {
   if (hasWon.value) {
     pauseGame()
-    winSoundPlay()
+    // winSoundPlay()
+    bingoSoundPlay()
     showAlertWin.value = true
   }
 }
@@ -330,9 +360,7 @@ const resetGame = () => {
   console.log(gamePaused.value)
 }
 
-
 const countPauseGame = ref(0)
-
 
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
@@ -354,14 +382,12 @@ const resumeGame = () => {
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
 
     randomBtnText.value = "Randomizing..."
-
   }
 }
 </script>
 
 <template>
   <div class="relative w-full h-full">
-    
     <!-- Video Background -->
     <video
       class="absolute top-0 left-0 w-full object-cover h-screen"
@@ -579,7 +605,8 @@ const resumeGame = () => {
                   Line Win Pattern
                 </h2>
                 <p class="text-lg text-green-700 font-semibold mt-2">
-                  Complete a single row<br />and claim your win!
+                  Your goal is to mark 5 matching numbers on your card in either
+                  of the following patterns ^^!
                 </p>
               </div>
               <figure>
@@ -603,7 +630,8 @@ const resumeGame = () => {
                   Blackout Win Pattern
                 </h2>
                 <p class="text-lg text-green-700 font-semibold mt-2">
-                  Fill the entire card to<br />achieve ultimate victory!
+                  Daub every number<br />
+                  on your card ^^!
                 </p>
               </div>
               <figure>
@@ -620,10 +648,17 @@ const resumeGame = () => {
     </div>
 
     <!-- game content -->
-    <div v-if="gameStart" class="relative z-10 flex flex-row w-full h-screen"
-    style="background-image: url('/img/bingopic1.jpg'); background-size: cover; background-position: center;" >
+    <div
+      v-if="gameStart"
+      class="relative z-10 flex flex-row w-full h-screen"
+      style="
+        background-image: url('/img/bg7.png');
+        background-size: cover;
+        background-position: center;
+      "
+    >
       <!-- Generate Bingo Table -->
-      <div class="w-2/5 flex flex-col justify-center items-center mt-10 ml-16">
+      <div class="w-2/5 flex flex-col justify-center items-center mt-2 ml-16">
         <table
           class="table-md bg-white m-1 rounded-lg table-zebra border border-black"
         >
@@ -684,6 +719,10 @@ const resumeGame = () => {
               <source src="/audio/click-sound1.wav" type="audio/wav" />
             </audio>
 
+            <audio controls ref="bingoSoundEffect" class="hidden">
+              <source src="/audio/bingo.mp3" type="audio/mp3" />
+            </audio>
+
             <!-- volume on icon -->
             <svg
               @click="onOffMusic"
@@ -737,12 +776,89 @@ const resumeGame = () => {
         </div>
 
         <div class="flex flex-row items-center mt-6">
-          <div
-            class="p-3 shadow-md rounded-full w-16 h-16 text-center border border-neutral-950 border-r-4"
-          >
-            <p class="text-3xl font-bold text-black">
-              {{ usedNumber[usedNumber.length - 1] }}
-            </p>
+          <div>
+            <svg
+              width="150"
+              height="150"
+              viewBox="0 0 120 120"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="50"
+                fill=""
+                stroke="#000"
+                stroke-width="2"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r="30"
+                fill="#fff"
+                stroke="#000"
+                stroke-width="2"
+              />
+
+              <text
+                x="60"
+                y="60"
+                font-size="24"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                fill="black"
+              >
+                {{ usedNumber[usedNumber.length - 1] }}
+              </text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Display the first 3 numbers -->
+        <div class="flex flex-col items-center mt-3" v-show="showWhileRandom">
+          <div>
+            <div class="flex flex-row gap-4">
+              <div
+                v-for="(num, index) in visibleNumbers.toReversed()"
+                :key="index"
+                class="flex w-28 h-28 items-center justify-center rounded-full shadow-lg border-2 border-white"
+              >
+                <svg
+                  width="150"
+                  height="150"
+                  viewBox="0 0 120 120"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill=""
+                    stroke="#000"
+                    stroke-width="2"
+                  />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="30"
+                    fill="#fff"
+                    stroke="#000"
+                    stroke-width="2"
+                  />
+                  <!-- ข้อความตรงกลาง -->
+                  <text
+                    x="60"
+                    y="60"
+                    font-size="24"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="black"
+                  >
+                    {{ num }}
+                  </text>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -788,9 +904,8 @@ const resumeGame = () => {
             </button>
           </div>
 
-        
           <button
-            class="btn btn-lg btn-fantasy mr-3"
+            class="btn btn-lg start-button mr-3"
             :disabled="
               randomBtnText === 'Out Of Number!' || toDisabledwhileRandom
             "
@@ -829,23 +944,81 @@ const resumeGame = () => {
           </button>
         </div>
 
-        <div class="flex flex-col items-center mt-8" v-show="showWhileRandom">
-          <!-- Display the first 5 numbers -->
-          <div
-            class="relative p-6 border-4 border-blue-500 rounded-full bg-white shadow-xl flex items-center justify-center w-[450px] h-[100px]"
+        <div class="flex gap-2">
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
           >
-            <div class="flex flex-row gap-4">
-              <div
-                v-for="(num, index) in visibleNumbers.toReversed()"
-                :key="index"
-                class="flex w-16 h-16 items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-50"
-              >
-                <p class="text-2xl font-bold text-white">
-                  {{ num }}
-                </p>
-              </div>
-            </div>
-          </div>
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+
+          <svg
+            v-show="countPauseGame === 1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+          <svg
+            v-show="countPauseGame === 1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
+
+          <svg
+            v-show="countPauseGame === 2"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#fff152"
+              d="M21.947 9.179a1 1 0 0 0-.868-.676l-5.701-.453l-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107l-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4l4.536-4.082c.297-.268.406-.686.278-1.065"
+            />
+          </svg>
         </div>
       </div>
 
@@ -891,7 +1064,7 @@ const resumeGame = () => {
                       ? `bg-pink-500 text-white`
                       : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
-                      usedNumber[usedNumber.length - 1],
+                      usedNumber[usedNumber.length - 1]
                   ]"
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
@@ -911,7 +1084,7 @@ const resumeGame = () => {
             </button>
           </div>
           <!-- Alert Win -->
-      <div
+          <div
             v-show="showAlertWin"
             class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center"
           >
@@ -985,11 +1158,8 @@ const resumeGame = () => {
               </div>
             </div>
           </div>
-          
-          
         </div>
       </div>
-      
     </div>
   </div>
 </template>
@@ -1004,7 +1174,54 @@ th {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.btn-fantasy {
+.start-button {
+  background: linear-gradient(180deg, #f1c40f, #e91e63);
+  border: 3px solid #feee9f;
+  border-radius: 50px;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: inset -4px -4px 10px rgba(255, 255, 255, 0.7),
+    inset 4px 4px 10px rgba(0, 0, 0, 0.1), 0px 4px 10px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+  position: relative;
+}
+
+.start-button:hover {
+  transform: scale(1.05);
+}
+
+.start-button:active {
+  transform: scale(0.95);
+}
+
+.start-button::before {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 20%;
+  height: 20%;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.start-button::after {
+  content: "";
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 30%;
+  height: 10%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  filter: blur(2px);
+}
+
+/* .btn-fantasy {
   background: linear-gradient(135deg, #e74c3c, #f1c40f, #3498db);
   color: white;
   font-size: 1.5rem;
@@ -1045,7 +1262,7 @@ th {
   color: #777;
   box-shadow: none;
   cursor: not-allowed;
-}
+} */
 
 .bounce-in-top {
   -webkit-animation: bounce-in-top 1.1s both;
