@@ -267,7 +267,7 @@ const startAutoRandomNumber = () => {
       endCountdown()
     }
     randomNumber()
-  }, 500)
+  }, 5000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -785,7 +785,7 @@ const resumeGame = () => {
                 stroke="#000"
                 stroke-width="2"
               />
-              <!-- ข้อความตรงกลาง -->
+              
               <text
                 x="60"
                 y="60"
@@ -807,7 +807,7 @@ const resumeGame = () => {
               <div
                 v-for="(num, index) in visibleNumbers.toReversed()"
                 :key="index"
-                class="flex w-12 h-12 items-center justify-center rounded-full shadow-lg"
+                class="flex w-28 h-28 items-center justify-center rounded-full shadow-lg"
               >
                 <svg
                   width="150"
@@ -1084,8 +1084,8 @@ th {
 }
 
 .start-button {
-  background: linear-gradient(180deg, #b4e197, #83bd75);
-  border: 3px solid #4e944f;
+  background: linear-gradient(180deg, #F1C40F, #E91E63);
+  border: 3px solid #feee9f;
   border-radius: 50px;
   color: white;
   font-size: 24px;
