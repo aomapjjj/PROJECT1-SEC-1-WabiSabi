@@ -5,11 +5,11 @@
 - **Student ID**: 65130500050
   - **Name**: นางสาวพาณิภัค จงศิริวาณิช
   - **Role**: 
-  - **Work Percentage**:
+  - **Work Percentage**: 25%
 - **Student ID**: 65130500052
   - **Name**: นางสาวพิมพ์พิชญา แก้วแสง
   - **Role**: 
-  - **Work Percentage**:
+  - **Work Percentage**: 25%
 - **Student ID**: 65130500056
   - **Name**: นางสาวแพรไหม วรรณศิริ
   - **Role**: 
@@ -17,10 +17,7 @@
 - **Student ID**: 65130500060
   - **Name**: นายภานุวัฒน์ วงษ์กระจ่าง
   - **Role**: 
-  - **Work Percentage**:
-
-*Total Work Contribution: 100% (Group)*
-
+  - **Work Percentage**: 25%
 ---
 
 ## Application Features
