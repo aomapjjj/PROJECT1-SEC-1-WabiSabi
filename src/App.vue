@@ -46,7 +46,7 @@ onMounted(() => {
 const select60Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
   let availableNumbers = [...numbers.value] // สร้างสำเนาของ numbers ที่มีตัวเลข 1-75
-  while (drawnNumbers.value.length < 75) {
+  while (drawnNumbers.value.length < 60) {
     // เราต้องการ 60 ตัวเลข ไม่ใช่ 35
     let randomIndex = Math.floor(Math.random() * availableNumbers.length)
     let number = availableNumbers.splice(randomIndex, 1)[0]
@@ -121,7 +121,7 @@ const toggleSelection = (number) => {
       selectedNumbers.value = selectedNumbers.value.filter(
         (num) => num !== number
       )
-    } else {
+    } else if(gamePaused.value === false) {
       selectedNumbers.value.push(number)
       clickMusic()
     }
@@ -276,7 +276,7 @@ const startAutoRandomNumber = () => {
       endCountdown()
     }
     randomNumber()
-  }, 200)
+  }, 4000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
@@ -294,7 +294,7 @@ const startCountdown = () => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(interval)
-      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้ ปรับเลย
+      countdown.value = 10 //อยากให้วินาธีจบเกมตรงนี้
       alertCountdown.value = false
     }
   }, 1000)
@@ -302,12 +302,12 @@ const startCountdown = () => {
 
 const endCountdown = () => {
   let interval = setInterval(() => {
+    if (isBingoClicked.value) {
+      clearInterval(interval)
+      return
+    }
     countdown.value--
-    if (countdown.value <= 0) {
-      if(hasWon.value){
-        endGameCountDown.value = false
-        countdown.value
-      }else{
+    if (countdown.value < 0) {
       clearInterval(interval)
       endGameCountDown.value = false
       randomBtnText.value = "Out Of Number!"
@@ -315,14 +315,16 @@ const endCountdown = () => {
       showAlertLose.value = true // แสดงข้อความว่าแพ้
       loseSoundPlay() // เล่นเสียงแพ้
     }
-    }
   }, 1000)
 }
 
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
+const isBingoClicked =ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
 
 const handleBingoClick = () => {
+  isBingoClicked.value = true
+  clearInterval(autoRandomInterval)
   if (hasWon.value) {
     pauseGame()
     // winSoundPlay()
@@ -358,6 +360,8 @@ const resetGame = () => {
   autoRandomInterval = null
   gamePaused.value = false
   console.log(gamePaused.value)
+  isBingoClicked.value = false
+  endGameCountDown.value = false
 }
 
 const countPauseGame = ref(0)
@@ -368,7 +372,7 @@ const pauseGame = () => {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = "Game Paused"
+    randomBtnText.value = "Game Pause"
     countPauseGame.value++
     console.log(countPauseGame.value)
   }
@@ -758,6 +762,7 @@ const resumeGame = () => {
             <div
               class="bg-red-600 h-2.5 rounded-full"
               :style="{ width: countdown * 10 + '%' }"
+               style="transition: width 1s linear;"
             ></div>
           </div>
         </div>
