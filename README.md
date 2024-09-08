@@ -11,7 +11,9 @@
   - 
 
 ### [moodmoon](https://github.com/moodmoon) 65130500050 นางสาวแพรไหม วรรณศิริ (25%)
-  -   
+  -   auto random number
+  -   display a random numbers
+  -   display the first 3 numbers
 
 ### [OParnu](https://github.com/OParnu) 65130500060 นายภานุวัฒน์ วงษ์กระจ่าง (25%)
   - 
