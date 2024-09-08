@@ -267,7 +267,7 @@ const startAutoRandomNumber = () => {
       endCountdown()
     }
     randomNumber()
-  }, 200)
+  }, 4000)
 
   // แสดง countdown เฉพาะตอนเริ่มเกม ไม่ใช่ตอน resume
   if (!isResuming.value) {
