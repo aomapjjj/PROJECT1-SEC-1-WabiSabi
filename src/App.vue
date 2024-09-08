@@ -38,10 +38,6 @@ const setLevel = (newLevel) => {
   level.value = newLevel
 }
 
-onMounted(() => {
-  shuffleNumber()
-})
-
 // Randomly select 60 unique numbers
 const select60Numbers = () => {
   drawnNumbers.value = [] // รีเซ็ตตัวเลขที่ถูกสุ่มออกมาก่อนหน้านี้
@@ -92,7 +88,8 @@ const generateBingoTable = () => {
   }
   return bingoTable.value
 }
-console.log(generateBingoTable())
+
+generateBingoTable()
 
 let numberOnBoard = Array.apply(null, { length: 76 }).map(Number.call, Number)
 numberOnBoard.shift()
@@ -100,7 +97,7 @@ numberOnBoard.shift()
 const shuffleNumber = () => {
   let currentIndex = numberOnBoard.length,
     randomIndex
-
+    
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
@@ -110,10 +107,12 @@ const shuffleNumber = () => {
     ]
   }
   shuffledNumbers.value = [...numberOnBoard]
+
   toDisabledwhileRandom.value = false
 }
 
-//console.log(numberOnBoard)
+
+shuffleNumber()
 
 const toggleSelection = (number) => {
   if (usedNumber.value.includes(number)) {
@@ -132,37 +131,31 @@ const isSelected = (number) => {
   return selectedNumbers.value.includes(number)
 }
 
-//console.log("selectedNumbers.value", selectedNumbers.value)
-
+// music and effects
 const musicPlayer = ref('')
 const playingMusic = ref(false)
+const clicksound = ref('')
+const loseSoundEffect = ref('')
+const winSoundEffect = ref('')
+const bingoSoundEffect = ref('')
 
 const onOffMusic = () => {
   playingMusic.value = !playingMusic.value
   if (playingMusic.value) musicPlayer.value.play()
   else musicPlayer.value.pause()
-  console.log(playingMusic.value)
 }
-
-const clicksound = ref('')
 
 const clickMusic = () => {
   clicksound.value.play()
 }
 
-const loseSoundEffect = ref('')
-
 const loseSoundPlay = () => {
   loseSoundEffect.value.play()
 }
 
-const winSoundEffect = ref('')
-
 const winSoundPlay = () => {
   winSoundEffect.value.play()
 }
-
-const bingoSoundEffect = ref('')
 
 const bingoSoundPlay = () => {
   bingoSoundEffect.value.play()
@@ -172,31 +165,23 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-3)
 })
 
-console.log('visibleNumbers' + usedNumber.value)
-
-//console.log(visibleNumbers)
 
 const checkLineWin = () => {
   // Check rows
   for (let row = 0; row < 5; row++) {
     // อันนี้คือเช็คแต่ละ row นะ มันเลยสามารถกด 5 ตัวโดยที่ไม่สนกันได้
     let allMarked = true
-    // console.log(`Checking row ${row}`)
-
     for (let col = 0; col < 5; col++) {
       // อันนี้คือเช็คแต่ละ column ของ row เช่น index ที่ 5 ก็จะเป็น row 1 column 0
       const index = row * 5 + col // อันนี้คือ อินเด้กของมัน
+
       if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
-
-        // console.log(
-        //   `Row ${row}, Col ${col} is not marked. Value: ${shuffledNumbers.value[index]}`
-        // )
       }
+
     }
     if (allMarked) {
-      console.log(`Row ${row} is completely marked.`)
       return true
     }
   }
@@ -218,7 +203,7 @@ const checkLineWin = () => {
   let allMarked = true
   for (let i = 0; i < 5; i++) {
     //อันนี้หลักการเดียวกัน แต่อันนี้จะวนอาเรย์
-    const index = i * 5 + i //ถ้าลองคิดดูแนวทะแยงจะมีแค่ index 0 6 12 18 25 เหมือนคิดเลขนั่นแหละ
+    const index = i * 5 + i //ถ้าลองคิดดูแนวทะแยงจะมีแค่ index 0 6 12 18 24 เหมือนคิดเลขนั่นแหละ
     if (!selectedNumbers.value.includes(shuffledNumbers.value[index])) {
       //อันนี้เช็คว่าไม่ใช่อินเด้กที่เราตั้งไว้ใช่มั้ย
       allMarked = false
@@ -262,7 +247,7 @@ const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
   randomBtnText.value = 'Randomizing...'
   autoRandomInterval = setInterval(() => {
-    if (drawnNumbers.value.length == 1) {
+    if (drawnNumbers.value.length === 1) {
       endGameCountDown.value = true
       endCountdown()
     }
@@ -313,6 +298,7 @@ const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 const isBingoClicked = ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
 
+
 const handleBingoClick = () => {
   isBingoClicked.value = true
   clearInterval(autoRandomInterval)
@@ -350,13 +336,11 @@ const resetGame = () => {
   clearInterval(autoRandomInterval)
   autoRandomInterval = null
   gamePaused.value = false
-  console.log(gamePaused.value)
   isBingoClicked.value = false
   endGameCountDown.value = false
 }
 
 const countPauseGame = ref(0)
-
 // ฟังก์ชัน pause เกม
 const pauseGame = () => {
   if (autoRandomInterval) {
@@ -364,8 +348,7 @@ const pauseGame = () => {
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
     randomBtnText.value = 'Game Pause'
-    countPauseGame.value++
-    console.log(countPauseGame.value)
+    countPauseGame.value++  
   }
 }
 
@@ -375,10 +358,11 @@ const resumeGame = () => {
     isResuming.value = true
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
-
     randomBtnText.value = 'Randomizing...'
   }
+
 }
+
 </script>
 
 <template>
@@ -767,9 +751,9 @@ const resumeGame = () => {
         <div class="w-40 mb-5" v-if="endGameCountDown">
           <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
             <div
-              class="bg-red-500 h-2.5 rounded-full"
+              class="bg-red-500 h-2.5 rounded-full tranGame"
               :style="{ width: countdown * 10 + '%' }"
-              style="transition: width 1s linear"
+              
             ></div>
           </div>
         </div>
@@ -1102,11 +1086,11 @@ const resumeGame = () => {
                   :class="[
                     'h-20 w-20 text-center cursor-pointer',
                     isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                      ? `bg-pink-500 text-white`
-                      : '',
+                      ? `bg-pink-500 text-white` : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
                       usedNumber[usedNumber.length - 1]
                   ]"
+                  
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
                 </td>
@@ -1511,5 +1495,9 @@ th {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
+}
+
+.tranGame { 
+  transition: width 1s linear ;
 }
 </style>
