@@ -6,6 +6,7 @@
   - condition bingo line pattern
   - sound
   - reset game
+  - fix bug
 
 ### [Peacebluegirl](https://github.com/Peacebluegirl) 65130500052 นางสาวพิมพ์พิชญา แก้วแสง (25%)
   - 
@@ -16,7 +17,8 @@
   -   generate bingo board
 
 ### [OParnu](https://github.com/OParnu) 65130500060 นายภานุวัฒน์ วงษ์กระจ่าง (25%)
-  - 
+  -
+  - fix bug
 
 ---
 
