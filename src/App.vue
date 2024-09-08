@@ -95,16 +95,12 @@ let numberOnBoard = Array.apply(null, { length: 76 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 const shuffleNumber = () => {
-  let currentIndex = numberOnBoard.length,
-    randomIndex
+  let currentIndex = numberOnBoard.length , randomIndex
     
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
-    ;[numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [
-      numberOnBoard[randomIndex],
-      numberOnBoard[currentIndex]
-    ]
+    [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [ numberOnBoard[randomIndex], numberOnBoard[currentIndex]]
   }
   shuffledNumbers.value = [...numberOnBoard]
 
@@ -1161,10 +1157,7 @@ const resumeGame = () => {
             >
               <!-- Video Background -->
               <img src="/img/lose.png"  
-                class="absolute inset-0 w-full h-full object-cover"
-                
-              >
-              </img>
+                class="absolute inset-0 w-full h-full object-cover" >
 
               <!-- Content over Video -->
               <div class="relative z-10 card-body text-white">
