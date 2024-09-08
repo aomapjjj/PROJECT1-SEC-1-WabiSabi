@@ -3,7 +3,9 @@
 ## Member
 
 ### [aomapjjj](https://github.com/aomapjjj) 65130500050 นางสาวพาณิภัค จงศิริวาณิช (25%)
-  - 
+  - condition bingo line pattern
+  - sound
+  - reset game
 
 ### [Peacebluegirl](https://github.com/Peacebluegirl) 65130500052 นางสาวพิมพ์พิชญา แก้วแสง (25%)
   - 
