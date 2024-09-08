@@ -72,6 +72,7 @@
 - [Bingo Solo](https://www.marketjs.com/item/bingo-solo/) นำส่วนของ ui เกมมาปรับใช้ว่าแนวทางการเล่นบิงโกแบบผู้ใช้งานคนเดียวเป็นรูปแบบไหน
 - [Bingo from Plato Application](https://platoapp.com/en/games/bingo) นำส่วนของรูปแบบการบิงโกมาปรับใช้
 - [Button CSS ตอนเลือกโหมด](https://dev.to/webdeasy/top-20-css-buttons-animations-f41)
+- [นาทีที่ 5:31](https://www.youtube.com/watch?v=EZYQxts413Y&ab_channel=Dharanz) นำวิธีการสร้างตัวเลขเพื่อมาสร้างใบบิงโก
 - Music
   - [เพลงประกอบเกม](https://pixabay.com/th/music/pop-groove-226858/)
 - Effect
