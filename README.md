@@ -60,7 +60,7 @@
 ---
 
 ## Demo clip of the application's features (5-8min.)
-
+[HOW TO PLAY BINGO GAME](https://youtu.be/ggmcyUWCPpU)
 
 ---
 
