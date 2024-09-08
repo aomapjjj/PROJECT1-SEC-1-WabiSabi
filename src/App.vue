@@ -1176,15 +1176,11 @@ const resumeGame = () => {
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-72 mobileM:w-80 tablet:w-96 overflow-hidden"
             >
               <!-- Video Background -->
-              <video
+              <img src="/img/lose.png"  
                 class="absolute inset-0 w-full h-full object-cover"
-                autoplay
-                loop
-                muted
+                
               >
-                <source src="/video/heart.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              </img>
 
               <!-- Content over Video -->
               <div class="relative z-10 card-body text-white">
