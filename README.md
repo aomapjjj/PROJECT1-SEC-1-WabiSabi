@@ -12,7 +12,8 @@
 
 ### [moodmoon](https://github.com/moodmoon) 65130500050 นางสาวแพรไหม วรรณศิริ (25%)
   -   auto random number
-  -   display a random numbers and the first 3 numbers
+  -   display random numbers and the first 3 numbers
+  -   generate bingo board
 
 ### [OParnu](https://github.com/OParnu) 65130500060 นายภานุวัฒน์ วงษ์กระจ่าง (25%)
   - 
