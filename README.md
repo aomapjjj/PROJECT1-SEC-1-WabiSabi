@@ -20,6 +20,7 @@
   -   auto random number
   -   display random numbers and the first 3 numbers
   -   generate bingo board
+  -   sound effects
   -   count down 4 sec before play game
 
 ### [OParnu](https://github.com/OParnu) 65130500060 นายภานุวัฒน์ วงษ์กระจ่าง (25%)
