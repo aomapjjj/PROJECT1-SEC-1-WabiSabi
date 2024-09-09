@@ -11,7 +11,7 @@
 ### [Peacebluegirl](https://github.com/Peacebluegirl) 65130500052 นางสาวพิมพ์พิชญา แก้วแสง (25%)
   - 
 
-### [moodmoon](https://github.com/moodmoon) 65130500050 นางสาวแพรไหม วรรณศิริ (25%)
+### [moodmoon](https://github.com/moodmoon) 65130500056 นางสาวแพรไหม วรรณศิริ (25%)
   -   auto random number
   -   display random numbers and the first 3 numbers
   -   generate bingo board
