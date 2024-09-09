@@ -9,7 +9,11 @@
   - fix bug
 
 ### [Peacebluegirl](https://github.com/Peacebluegirl) 65130500052 นางสาวพิมพ์พิชญา แก้วแสง (25%)
-  - 
+  - toggle selection
+  - bingo win button
+  - reset game
+  - pause game
+  - alert
 
 ### [moodmoon](https://github.com/moodmoon) 65130500056 นางสาวแพรไหม วรรณศิริ (25%)
   -   auto random number
