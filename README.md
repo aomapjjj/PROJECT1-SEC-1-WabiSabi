@@ -17,7 +17,8 @@
   -   generate bingo board
 
 ### [OParnu](https://github.com/OParnu) 65130500060 นายภานุวัฒน์ วงษ์กระจ่าง (25%)
-  - Random 60 numbers from 75 numbers
+  - random 60 numbers from 75 numbers
+  - condition bingo blackout pattern
   - game ending count down 10 sec
   - count pause game button
   - random number
