@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 // random number to
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
@@ -25,8 +25,9 @@ const alertCountdown = ref(false)
 const showCard1 = ref(false)
 const showCard2 = ref(false)
 
-const showWhileRandom = ref(false)
-const numberWhileRandom = ref()
+// display nums
+const showWhileRandom = ref(false) //ใช้ในการควบคุมการแสดงหรือซ่อนหมายเลขที่ถูกสุ่ม โดยกำหนดเป็น false ในตอนแรก
+const numberWhileRandom = ref() //เก็บหมายเลขที่ถูกสุ่มล่าสุด
 
 // 1-75 bingo table
 const allNumbers = ref(Array.from(Array(76).keys()).splice(1))
@@ -240,8 +241,8 @@ const endGameCountDown = ref(false)
 
 // auto random
 const startAutoRandomNumber = () => {
-  toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  toDisabledwhileRandom.value = true // ปิดการใช้งานปุ่มสุ่มหมายเลขเมื่อฟังก์ชันเริ่มทำงาน
+  randomBtnText.value = 'Randomizing...' //เปลี่ยนข้อความบนปุ่มเป็น "Randomizing..." ขณะกำลังสุ่มหมายเลข
   autoRandomInterval = setInterval(() => {
     if (drawnNumbers.value.length === 1) {
       endGameCountDown.value = true
@@ -358,7 +359,6 @@ const resumeGame = () => {
   }
 
 }
-
 </script>
 
 <template>
