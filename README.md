@@ -5,6 +5,7 @@
 ### [aomapjjj](https://github.com/aomapjjj) 65130500050 นางสาวพาณิภัค จงศิริวาณิช (25%)
   - board bingo
   - condition bingo line pattern
+  - shuffle nums on board
   - sound music and effects
   - reset game
   - fix bug
