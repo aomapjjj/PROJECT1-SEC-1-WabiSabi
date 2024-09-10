@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref , computed, watch } from "vue"
 
 // random number to
 const numbers = ref(Array.from(Array(76).keys()).splice(1))
@@ -11,12 +11,12 @@ let autoRandomInterval = null
 const usedNumber = ref([])
 
 // button
-const randomBtnText = ref('Start Bingo Game')
+const randomBtnText = ref("Start Bingo Game")
 const toDisabledwhileRandom = ref(false)
 
 const shuffledNumbers = ref([])
 const selectedNumbers = ref([])
-const level = ref('default')
+const level = ref("default")
 const gameStart = ref(false)
 const countdown = ref(4)
 const alertCountdown = ref(false)
@@ -95,18 +95,19 @@ let numberOnBoard = Array.apply(null, { length: 76 }).map(Number.call, Number)
 numberOnBoard.shift()
 
 const shuffleNumber = () => {
+
   let currentIndex = numberOnBoard.length , randomIndex
-    
+
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex--
-    [numberOnBoard[currentIndex], numberOnBoard[randomIndex]] = [ numberOnBoard[randomIndex], numberOnBoard[currentIndex]]
+    [numberOnBoard[currentIndex] , numberOnBoard[randomIndex]] = [ numberOnBoard[randomIndex] , numberOnBoard[currentIndex] ]
+ 
   }
   shuffledNumbers.value = [...numberOnBoard]
 
   toDisabledwhileRandom.value = false
 }
-
 
 shuffleNumber()
 
@@ -128,12 +129,12 @@ const isSelected = (number) => {
 }
 
 // music and effects
-const musicPlayer = ref('')
+const musicPlayer = ref("")
 const playingMusic = ref(false)
-const clicksound = ref('')
-const loseSoundEffect = ref('')
-const winSoundEffect = ref('')
-const bingoSoundEffect = ref('')
+const clicksound = ref("")
+const loseSoundEffect = ref("")
+const winSoundEffect = ref("")
+const bingoSoundEffect = ref("")
 
 const onOffMusic = () => {
   playingMusic.value = !playingMusic.value
@@ -161,7 +162,6 @@ const visibleNumbers = computed(() => {
   return usedNumber.value.slice(-3)
 })
 
-
 const checkLineWin = () => {
   // Check rows
   for (let row = 0; row < 5; row++) {
@@ -175,7 +175,6 @@ const checkLineWin = () => {
         // มันจะทำงานโดยการเช็คตัวที่ไม่ได้ มาค ไม่ได้เช็คตัวที่มาคนะ
         allMarked = false
       }
-
     }
     if (allMarked) {
       return true
@@ -226,9 +225,9 @@ const checkBlackoutWin = () => {
 
 const hasWon = computed(() => {
   switch (level.value) {
-    case 'line':
+    case "line":
       return checkLineWin()
-    case 'blackout':
+    case "blackout":
       return checkBlackoutWin()
     default:
       return false
@@ -241,7 +240,7 @@ const endGameCountDown = ref(false)
 // auto random
 const startAutoRandomNumber = () => {
   toDisabledwhileRandom.value = true
-  randomBtnText.value = 'Randomizing...'
+  randomBtnText.value = "Randomizing..."
   autoRandomInterval = setInterval(() => {
     if (drawnNumbers.value.length === 1) {
       endGameCountDown.value = true
@@ -282,7 +281,7 @@ const endCountdown = () => {
     if (countdown.value < 0) {
       clearInterval(interval)
       endGameCountDown.value = false
-      randomBtnText.value = 'Out Of Number!'
+      randomBtnText.value = "Out Of Number!"
       clearInterval(autoRandomInterval) // หยุดการทำงานของ interval
       showAlertLose.value = true // แสดงข้อความว่าแพ้
       loseSoundPlay() // เล่นเสียงแพ้
@@ -293,7 +292,6 @@ const endCountdown = () => {
 const showAlertLose = ref(false)
 const showAlertWin = ref(false)
 const isBingoClicked = ref(false) //เอาไว้เช็คปุ่ม Bingo ว่ากดหรือยัง
-
 
 const handleBingoClick = () => {
   isBingoClicked.value = true
@@ -320,7 +318,7 @@ const resetGame = () => {
   drawnNumbers.value = []
   shuffleNumber() // รีเซ็ตตัวเลข
   select60Numbers() // สุ่มตัวเลขใหม่ 36 ตัว
-  randomBtnText.value = 'Start Bingo Game'
+  randomBtnText.value = "Start Bingo Game"
   toDisabledwhileRandom.value = false
   countPauseGame.value = 0
   countdown.value = 4
@@ -343,8 +341,8 @@ const pauseGame = () => {
     clearInterval(autoRandomInterval) // หยุดการสุ่มเลข
     autoRandomInterval = null
     gamePaused.value = true // ตั้งค่าให้เกมอยู่ในสถานะ pause
-    randomBtnText.value = 'Game Pause'
-    countPauseGame.value++  
+    randomBtnText.value = "Game Pause"
+    countPauseGame.value++
   }
 }
 
@@ -354,11 +352,9 @@ const resumeGame = () => {
     isResuming.value = true
     startAutoRandomNumber() // กลับไปเริ่มสุ่มเลขใหม่
     gamePaused.value = false // ตั้งค่าให้เกมอยู่ในสถานะเล่น
-    randomBtnText.value = 'Randomizing...'
+    randomBtnText.value = "Randomizing..."
   }
-
 }
-
 </script>
 
 <template>
@@ -749,7 +745,6 @@ const resumeGame = () => {
             <div
               class="bg-red-500 h-2.5 rounded-full tranGame"
               :style="{ width: countdown * 10 + '%' }"
-              
             ></div>
           </div>
         </div>
@@ -1082,11 +1077,11 @@ const resumeGame = () => {
                   :class="[
                     'h-20 w-20 text-center cursor-pointer',
                     isSelected(shuffledNumbers[(i - 1) * 5 + (j - 1)])
-                      ? `bg-pink-500 text-white` : '',
+                      ? `bg-pink-500 text-white`
+                      : '',
                     shuffledNumbers[(i - 1) * 5 + (j - 1)] ===
                       usedNumber[usedNumber.length - 1]
                   ]"
-                  
                 >
                   {{ shuffledNumbers[(i - 1) * 5 + (j - 1)] }}
                 </td>
@@ -1156,8 +1151,10 @@ const resumeGame = () => {
               class="bounce-in-top relative card card-side bg-base-100 shadow-xl w-72 mobileM:w-80 tablet:w-96 overflow-hidden"
             >
               <!-- Video Background -->
-              <img src="/img/lose.png"  
-                class="absolute inset-0 w-full h-full object-cover" >
+              <img
+                src="/img/lose.png"
+                class="absolute inset-0 w-full h-full object-cover"
+              />
 
               <!-- Content over Video -->
               <div class="relative z-10 card-body text-white">
@@ -1216,7 +1213,7 @@ th {
 }
 
 .start-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 10%;
   left: 10%;
@@ -1228,7 +1225,7 @@ th {
 }
 
 .start-button::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 10%;
   right: 10%;
@@ -1350,7 +1347,7 @@ th {
 }
 
 .jersey-20-regular {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -1399,7 +1396,7 @@ th {
 }
 
 .button:after {
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
   padding: 4px;
@@ -1490,7 +1487,7 @@ th {
   }
 }
 
-.tranGame { 
-  transition: width 1s linear ;
+.tranGame {
+  transition: width 1s linear;
 }
 </style>
