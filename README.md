@@ -50,10 +50,11 @@
 <img width="1440" alt="" src="https://github.com/user-attachments/assets/fdddf9c6-ec7d-470a-aa14-272dbb7f4f74">
 
 - **Line:** ผู้เล่นจะบิงโกได้ก็ต่อเมื่อ **คลิกเลขที่ตรงกัน 5 ตัวบนใบบิงโกในรูปแบบได้แบบหนึ่ง**
-<img width="300" hight="300" alt="Line Win Pattern" src="https://github.com/user-attachments/assets/03f93fa5-2118-4e7f-867a-6970511ab4d1" >
+<img width="1440" alt="Screenshot 2567-09-10 at 12 57 34" src="https://github.com/user-attachments/assets/43417ed5-2ee2-418e-b5fa-584ed5740fa6">
 
 - **Blackout:** ผู้เล่นจะบิงโกได้ก็ต่อเมื่อ **กดทุกเลขบนใบบิงโก**
-<img width="300" hight="300" alt="Blackout Pattern" src="https://github.com/user-attachments/assets/7870683a-40f0-4901-8f99-e1c658cfa4c8" class="center">
+<img width="1440" alt="Screenshot 2567-09-10 at 12 57 39" src="https://github.com/user-attachments/assets/6232a555-1006-40b5-9816-f271410c155a">
+
 
 #### 2. เมื่อเลือกโหมดที่ต้องการเล่นได้แล้ว ผู้เล่นสามารถ shuffle เพื่อเปลี่ยนเลขบนใบบิงโกได้ เมื่อผู้เล่นพร้อมแล้วให้กดปุ่มเล่นเกมที่อยู่ตรงกลาง
 <img width="1440" alt="Screenshot 2567-09-08 at 20 36 23" src="https://github.com/user-attachments/assets/66bacde4-eacd-465e-b86a-0c1d1954e3a9">
